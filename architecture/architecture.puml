@@ -7,12 +7,14 @@ skinparam defaultFontName Arial
 
 '=== UI Layer ===
 package "Client / Presentation Layer\n(Client–Server)" as UI {
+  [Chat Interfaces (LLM)] as CHAT
   [Web App (Dashboard, Approvals)] as WEB
   [API Gateway] as APIGW
 }
 
 '=== Service Layer ===
 package "Service Layer\n(Service-Oriented)" as SVC {
+  [Conversation Orchestrator\n(Function Calling / Tool Use)] as ORCH
   [Agent Service (LLM + Tools)] as AGENT
   [Decision & Governance Service\nExplainability, Approvals, Monitoring] as GOV
 }
@@ -38,10 +40,11 @@ package "Data / Ingestion Layer\n(Pipe & Filter • Batch Sequential)" as DATA {
 }
 
 '=== Flows ===
+CHAT --> APIGW
 WEB --> APIGW
 APIGW --> AGENT
 APIGW --> GOV
-GOV --> WEB
+APIGW --> ORCH
 
 AGENT --> OPT
 AGENT --> EMA
