@@ -1,0 +1,102 @@
+@startuml architecture
+title AI Strategic Planning Tool — Layered + Service-Oriented Architecture
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultFontName Arial
+skinparam wrapWidth 240
+skinparam maxMessageSize 240
+
+'=== LAYERS ===============================================================
+package "Client / Presentation Layer" as L1 {
+  [Web App\n(React/Next.js)] as UI
+  [API Gateway\n(FastAPI/GraphQL,\nAuth: OIDC/SAML, RBAC)] as APIGW
+}
+
+package "Decision & Governance Layer" as L2 {
+  [Decision Service\n(Explainability, Provenance,\nApprovals/OKRs, Notifications)] as DECIDE
+  [Monitoring & Ops\n(Prometheus/Grafana,\nUsage & Audit Logs)] as MON
+}
+
+package "Reasoning & Planning Layer" as L3 {
+  component "Agent Service\n(LLM via LangGraph/CrewAI,\nDecomposition • Reflection • Memory)" as AGENT
+  [RulesCheck Tool\n(Policy/Accreditation Engine)] as RULES
+  [Optimization Service\n(Pyomo / OR-Tools,\nCBC/GLPK/Gurobi)] as OPT
+  [Search Tool\n(Vector RAG API)] as SEARCH
+  [KPI Query Tool\n(SQL over Warehouse)] as KPIQ
+}
+
+package "Analysis Layer" as L4 {
+  [Scenario & Robustness\n(EMA Workbench • XLRM • PRIM)] as EMA
+}
+
+package "Unified Knowledge Layer" as L5 {
+  [Vector DB (RAG)\nWeaviate/Milvus + BM25 + Reranker\nCitations & Freshness] as VDB
+  [Knowledge Graph\nNeo4j/Arango • Programs–Courses–Sections–FTE–Budget–KPI\nVersioned Policies & Provenance] as KG
+  [KPI Store / Warehouse\nPostgres/BigQuery\nTime-series KPIs • Master Data] as DWH
+}
+
+package "Connectors & ETL Layer" as L6 {
+  [ETL Orchestrator\n(Airflow/Prefect + dbt)] as ETL
+  [Data Validators\n(Great Expectations)] as VALID
+  [Object Store\n(S3/GCS)] as OBJ
+  [OCR/Parsing\n(Tesseract, PDF/Text Splitters)] as OCR
+  [Internal Systems\n(SIS/ERP/Finance/HR)] as INT
+  [External Sources\n(IPEDS/CSU, Accreditation PDFs,\nCompetitor Sites/APIs)] as EXT
+}
+
+'=== FLOWS (TOP-DOWN / CLIENT→SERVICES) ==================================
+UI --> APIGW
+APIGW --> AGENT
+APIGW --> DECIDE
+DECIDE --> UI
+MON --> DECIDE
+DECIDE --> APIGW
+
+'=== AGENT TOOLS & SERVICES ==============================================
+AGENT --> SEARCH : retrieve context\n(citations, freshness)
+AGENT --> KPIQ : query KPIs/metrics
+AGENT --> RULES : validate/score plans\n(hard+soft constraints)
+AGENT --> OPT   : allocate budget/FTE/space
+AGENT --> EMA   : run robustness experiments\n(satisficing %, regret, PRIM)
+
+'=== KNOWLEDGE LAYER INTERACTIONS ========================================
+SEARCH --> VDB
+KPIQ --> DWH
+RULES --> KG
+OPT --> DWH
+OPT --> KG
+EMA --> DWH
+EMA --> KG
+
+'=== ETL / DATA PLUMBING ==================================================
+ETL --> DWH
+ETL --> KG
+OCR --> VDB
+OBJ <-- OCR
+VALID --> ETL
+INT --> ETL
+EXT --> OCR
+EXT --> ETL
+
+'=== GOVERNANCE / FEEDBACK LOOPS =========================================
+DECIDE --> KG : write approvals/provenance
+MON --> AGENT : drift alerts → re-plan
+MON --> ETL   : refresh triggers
+
+'=== LEGEND ===============================================================
+legend left
+== Styles ==
+• Layered + Service-Oriented + Client–Server + Pipeline
+== Key Technologies ==
+UI: React/Next.js • API: FastAPI/GraphQL • Auth: OIDC/SAML
+Agent: LangGraph/CrewAI (LLM with tools & memory)
+Search: Weaviate/Milvus + BM25 + Cross-Encoder Rerank
+KG: Neo4j/Arango • Warehouse: Postgres/BigQuery
+Optimization: Pyomo/OR-Tools (CBC/GLPK/Gurobi)
+Robustness: EMA Workbench (XLRM, PRIM)
+ETL: Airflow/Prefect + dbt • Validation: Great Expectations
+OCR: Tesseract • Object Store: S3/GCS • Monitoring: Prom/Grafana
+endlegend
+@enduml
