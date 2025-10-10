@@ -21,7 +21,7 @@ services:
       VECTOR_DB_TYPE: pgvector
       EMBEDDINGS_PROVIDER: google_genai
       EMBEDDINGS_MODEL: gemini-embedding-001
-      RAG_GOOGLE_API_KEY: AIzaSyC3ipaRhMbFyEsCx0Y93XLulfl6f7G62cw
+      RAG_GOOGLE_API_KEY: ${RAG_GOOGLE_API_KEY}
       COLLECTION_NAME: strategic_docs
     depends_on: [db]
     ports: ["8010:8000"]
