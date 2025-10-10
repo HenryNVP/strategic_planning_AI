@@ -1,0 +1,41 @@
+version: "3.8"
+services:
+  db:
+    image: ankane/pgvector
+    environment:
+      POSTGRES_DB: ragdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports: ["55432:5432"]
+
+  rag_api:
+    build: ./services/rag_api
+    env_file:
+      - ./services/rag_api/.env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      POSTGRES_DB: ragdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      VECTOR_DB_TYPE: pgvector
+      EMBEDDINGS_PROVIDER: google_genai
+      EMBEDDINGS_MODEL: gemini-embedding-001
+      RAG_GOOGLE_API_KEY: AIzaSyC3ipaRhMbFyEsCx0Y93XLulfl6f7G62cw
+      COLLECTION_NAME: strategic_docs
+    depends_on: [db]
+    ports: ["8010:8000"]
+
+  agent_api:
+    build: ./services/agent_ai
+    env_file:
+      - ./services/agent_ai/.env.development
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ragdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      RAG_BASE_URL: http://rag_api:8000   # agent calls RAG over HTTP
+    depends_on: [rag_api]
+    ports: ["8000:8000"]

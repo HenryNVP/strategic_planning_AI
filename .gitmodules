@@ -1,0 +1,6 @@
+[submodule "services/agent_ai"]
+	path = services/agent_ai
+	url = https://github.com/HenryNVP/agent_ai.git
+[submodule "services/rag_api"]
+	path = services/rag_api
+	url = https://github.com/HenryNVP/rag_api.git
