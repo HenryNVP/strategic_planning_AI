@@ -47,6 +47,14 @@ package "RAG API Service\nservices/rag_api" as RAG_SERVICE {
   [Async Workers\n(Thread pool, task fanout)] <<service>> as RAG_WORKERS
 }
 
+' === Analysis Layer ===
+package "Analysis Layer\n(parallel evaluation)" as ANALYSIS_LAYER {
+  [Decision & Governance Hub\n(approvals, explainability)] <<service>> as DECISION
+  [Rules & Compliance Engine\n(policy & budget checks)] <<service>> as RULES
+  [Scenario Simulation Service\n(EMA Workbench, HPC/Ray)] <<service>> as SCENARIO
+  [Optimization Service\n(strategy generation)] <<service>> as OPTIM
+}
+
 ' === Data / Storage ===
 database "Postgres + pgvector\n(db container)" <<data>> as PG_DB
 [LangGraph Checkpoints\n(checkpoint_* tables)] <<data>> as CHECKPOINTS
@@ -75,6 +83,7 @@ CHAT_API --> CHECKPOINTS : persist conversation state
 LANGGRAPH --> RAG_QUERY : rag_search tool\n(JWT-authenticated call)
 LANGGRAPH --> LLM_PROVIDERS : send prompts / receive completions
 LANGGRAPH --> CHECKPOINTS : load/store state snapshots
+LANGGRAPH --> DECISION : submit analysis workflows
 
 DOC_PROXY --> RAG_UPLOAD : signed pass-through for files
 
@@ -84,6 +93,15 @@ RAG_UPLOAD --> PG_DB : store chunks & vectors
 
 RAG_QUERY --> PG_DB : similarity search (pgvector)
 RAG_QUERY --> RAG_WORKERS
+
+DECISION --> RULES : run compliance checks
+DECISION --> SCENARIO : launch scenario experiments
+DECISION --> OPTIM : request strategy optimization
+RULES --> DECISION : validation results
+SCENARIO --> DECISION : scenario metrics & findings
+OPTIM --> DECISION : recommended portfolios
+SCENARIO --> PG_DB : persist experiment outputs / KPIs
+OPTIM --> RAG_UPLOAD : publish strategy summaries
 
 CHAT_API --> OBS_AGENT
 CHAT_API --> LANGFUSE
@@ -107,6 +125,12 @@ note bottom of RAG_SERVICE
 FastAPI + uvicorn
 Handles uploads, chunking, embeddings, and vector search
 Requires shared JWT secret with Agent API
+end note
+
+note bottom of ANALYSIS_LAYER
+Framework-agnostic microservices
+Decision hub coordinates rule checks, simulations, and optimization
+Parallel workloads emit telemetry for observability tooling
 end note
 
 note bottom of PG_DB
