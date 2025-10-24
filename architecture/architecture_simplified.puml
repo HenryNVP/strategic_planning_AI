@@ -1,0 +1,41 @@
+@startuml architecture_simplified
+title Strategic Planning AI – Simplified View
+
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam packageStyle rectangle
+
+rectangle "Client Layer\n(UI + Integrations)" as CLIENT {
+  rectangle "Web Dashboard\n/ Mock Tester UI" as UI
+  rectangle "External Consumers" as EXT
+}
+
+rectangle "Service Layer\n(Agent API)" as SERVICE {
+  rectangle "LangGraph Agent\n(session, tools)" as AGENT
+  rectangle "API Gateway\n(auth, rate limiting)" as GATEWAY
+}
+
+rectangle "Analysis Layer\n(parallel workflows)" as ANALYSIS {
+  rectangle "Decision & Governance" as DECISION
+  rectangle "Rules Engine" as RULES
+  rectangle "Scenario Simulation" as SCENARIO
+  rectangle "Optimization" as OPTIM
+}
+
+rectangle "Knowledge Layer\n(context + metrics)" as KNOWLEDGE {
+  rectangle "Vector Store\n(pgvector)" as VSTORE
+  rectangle "Knowledge & KPI Store" as KPI
+}
+
+rectangle "LLM Providers\n(OpenAI / Gemini)" as LLM
+rectangle "Observability Stack\n(Prometheus, Grafana, Langfuse)" as OBS
+
+CLIENT --> SERVICE : chat, uploads, approvals
+SERVICE --> ANALYSIS : orchestrate analyses
+SERVICE --> KNOWLEDGE : retrieve context
+ANALYSIS --> KNOWLEDGE : persist outcomes, fetch baseline data
+SERVICE --> LLM : prompt completions
+SERVICE --> OBS : emit metrics
+ANALYSIS --> OBS : traces & telemetry
+
+@enduml

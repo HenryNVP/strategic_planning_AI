@@ -1,0 +1,61 @@
+@startuml analysis_layer_details
+title Analysis Layer – Workflow Components
+
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam rectangle {
+  BackgroundColor #2C2F3A
+  FontColor #F2F4FF
+  BorderColor #9AA7FF
+}
+
+rectangle "Decision & Governance Hub\n(orchestration + approvals)" as DECISION {
+  rectangle "Workflow Intake\n(strategy + metadata)" as INTAKE
+  rectangle "Approval & Audit Trail\n(explainability)" as AUDIT
+  rectangle "Dispatcher\n(task fan-out, retries)" as DISPATCH
+}
+
+rectangle "Rules & Compliance Engine\n(policy + budget checks)" as RULES {
+  rectangle "Policy Catalog" as POLICY
+  rectangle "Constraint Solver" as CONSTRAINT
+}
+
+rectangle "Scenario Simulation Service\n(EMA Workbench / Ray)" as SCENARIO {
+  rectangle "Scenario Library" as LIBRARY
+  rectangle "Experiment Runner\n(parallel workers)" as RUNNER
+  rectangle "Metrics Aggregator" as METRICS
+}
+
+rectangle "Optimization Service\n(strategy generation)" as OPTIM {
+  rectangle "Objective Configurator" as OBJECTIVE
+  rectangle "Solver Backend\n(LP/MIP/Heuristics)" as SOLVER
+  rectangle "Recommendation Builder" as RECOMMEND
+}
+
+rectangle "Shared Resources" as SHARED {
+  rectangle "Task Queue\n(Redis/NATS)" as QUEUE
+  rectangle "Workflow DB\n(Postgres)" as WORKFLOW_DB
+  rectangle "Telemetry\n(OpenTelemetry, Langfuse)" as TELEMETRY
+}
+
+INTAKE --> DISPATCH : create workflow
+DISPATCH --> RULES : compliance job
+DISPATCH --> SCENARIO : scenario runs
+DISPATCH --> OPTIM : optimization job
+
+RULES --> WORKFLOW_DB : results
+SCENARIO --> WORKFLOW_DB : metrics
+OPTIM --> WORKFLOW_DB : recommendations
+
+RULES --> TELEMETRY
+SCENARIO --> TELEMETRY
+OPTIM --> TELEMETRY
+
+DISPATCH --> QUEUE : enqueue tasks
+QUEUE --> RULES
+QUEUE --> SCENARIO
+QUEUE --> OPTIM
+
+AUDIT --> WORKFLOW_DB : approvals, rationale
+
+@enduml

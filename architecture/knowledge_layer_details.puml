@@ -1,0 +1,48 @@
+@startuml knowledge_layer_details
+title Knowledge & Data Layer – Detailed View
+
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam rectangle {
+  BackgroundColor #1E2A23
+  FontColor #E6F2EA
+  BorderColor #65C18C
+}
+
+rectangle "Vector Store Cluster\n(Postgres + pgvector)" as VECTOR {
+  rectangle "Document Chunks" as CHUNKS
+  rectangle "Embeddings" as EMBEDDINGS
+  rectangle "Metadata Tables" as METADATA
+}
+
+rectangle "Knowledge & KPI Store\n(Time-series / relational DB)" as KPI {
+  rectangle "Academic KPIs\n(enrollment, retention)" as KPI_ACAD
+  rectangle "Financial KPIs\n(revenue, budget)" as KPI_FIN
+  rectangle "Governance KPIs\n(accreditation, compliance)" as KPI_GOV
+}
+
+rectangle "Ingestion Pipelines" as INGEST {
+  rectangle "Document Parsers\n(PDF, CSV, HTML)" as PARSERS
+  rectangle "Embedding Jobs\n(batch, streaming)" as EMB_JOBS
+  rectangle "Data Syncs\n(ETL from ERP/SIS)" as DATA_SYNC
+}
+
+rectangle "Access Interfaces" as ACCESS {
+  rectangle "RAG API" as RAG
+  rectangle "Analysis Layer" as ANALYSIS
+  rectangle "Reporting & Dashboards" as REPORTING
+}
+
+PARSERS --> CHUNKS
+EMB_JOBS --> EMBEDDINGS
+DATA_SYNC --> KPI
+INGEST --> METADATA : provenance, tags
+
+RAG --> CHUNKS : similarity search
+RAG --> EMBEDDINGS
+ANALYSIS --> KPI : baseline metrics
+ANALYSIS --> METADATA : persist scenario results
+REPORTING --> KPI
+REPORTING --> METADATA
+
+@enduml

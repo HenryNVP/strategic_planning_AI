@@ -14,6 +14,9 @@ The solution is composed of three core services plus supporting infrastructure:
 - **RAG API (`services/rag_api`)**  
   FastAPI application responsible for file ingestion, chunking, embedding creation, and vector similarity search. It exposes signed endpoints such as `/embed`, `/query`, and `/ids`. A shared JWT secret protects these endpoints from ad-hoc access.
 
+- **Analysis Layer (`services/analysis_layer`)**  
+  New microservice scaffold that coordinates rules validation, scenario simulations, and optimization workflows. It currently ships with stubbed implementations and typed APIs so you can plug in the real computation backends incrementally.
+
 - **Postgres + pgvector (`db` service)**  
   Stores conversational state (LangGraph checkpoints), user/session records, and vector embeddings in dedicated schemas. The RAG service writes document chunks here; the agent reads them when resolving queries.
 
@@ -158,4 +161,3 @@ docker_compose.yml           Orchestrates db, rag_api, agent_api
 - Export rendered architecture diagrams and embed them into documentation or slide decks.
 
 Feel free to iterate on the environment configuration and chunking parameters as you ingest larger university datasets or private knowledge sources.
-

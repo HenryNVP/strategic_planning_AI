@@ -11,6 +11,12 @@ participant "LangGraph Orchestrator" as LANGGRAPH
 participant "RAG Proxy\n(/api/v1/documents)" as DOC_PROXY
 participant "RAG API\n(/embed, /query)" as RAG_API
 database "Postgres\n(pgvector)" as PG
+database "Knowledge & KPI Store\n(time-series)" as KPI
+participant "Analysis API\n(/api/v1/analysis)" as ANALYSIS
+participant "Decision Hub\n(orchestration)" as DECISION
+participant "Rules Engine" as RULES
+participant "Scenario Service" as SCENARIO
+participant "Optimization Service" as OPTIM
 participant "Embeddings Service\n(Gemini)" as EMB
 participant "LLM Provider\n(GPT / Gemini)" as LLM
 participant "Langfuse / Metrics" as OBS
@@ -42,9 +48,28 @@ loop per user turn
     PG --> RAG_API : ranked vectors + metadata
     RAG_API --> LANGGRAPH : contextual passages
   end
+  alt analysis workflow requested
+    LANGGRAPH -> ANALYSIS : POST /analysis/workflows\n(strategy_id, flags, context)
+    ANALYSIS -> DECISION : enqueue workflow
+    DECISION -> RULES : evaluate constraints / policies
+    RULES --> DECISION : compliance result
+    DECISION -> SCENARIO : launch scenario set
+    SCENARIO -> KPI : read baseline KPIs
+    SCENARIO --> DECISION : scenario metrics
+    DECISION -> OPTIM : run optimization (optional)
+    OPTIM -> KPI : fetch constraints & history
+    OPTIM --> DECISION : recommendations
+    DECISION -> KPI : persist analysis outputs
+    DECISION --> ANALYSIS : aggregated findings
+    ANALYSIS --> LANGGRAPH : workflow status + evidence
+    ANALYSIS -> OBS : emit telemetry
+  else no analysis needed
+    LANGGRAPH -> OBS : log skipped analysis
+  end
   LANGGRAPH -> LLM : prompt(messages + context)
   LLM --> LANGGRAPH : assistant reply
   LANGGRAPH -> PG : persist checkpoint state
+  LANGGRAPH -> KPI : optional write-back of strategy summary
   LANGGRAPH --> AGENT : message list
   AGENT --> UI : ChatResponse (messages)
   AGENT -> OBS : emit metrics / traces
@@ -73,5 +98,6 @@ AGENT --> UI : confirmation
 == Monitoring ==
 AGENT -> OBS : Prometheus metrics, Langfuse traces
 RAG_API -> OBS : service metrics / logs
+ANALYSIS -> OBS : workflow telemetry
 
 @enduml

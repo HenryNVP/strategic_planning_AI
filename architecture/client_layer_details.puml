@@ -1,0 +1,29 @@
+@startuml client_layer_details
+title Client / Presentation Layer – Detailed View
+
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam rectangle {
+  BackgroundColor #203040
+  FontColor #E5EEF9
+  BorderColor #77A8FF
+}
+
+rectangle "Web Dashboard\n(Next.js / FastAPI UI)" as DASHBOARD {
+  rectangle "Session Manager\n(JWT storage, refresh)" as SESSION
+  rectangle "Chat Interface\n(streaming UI, message timeline)" as CHAT_UI
+  rectangle "Knowledge Console\n(doc upload, status cards)" as KB_UI
+  rectangle "Approval Workspace\n(strategy comparison, sign-off)" as APPROVALS
+}
+
+rectangle "External Integrations\n(Admin portals, SIS, tools)" as EXTERNAL
+
+rectangle "API Gateway\n(HTTPS termination, rate limits)\n/agent_api" as GATEWAY
+
+DASHBOARD --> GATEWAY : REST / WebSocket calls
+EXTERNAL --> GATEWAY : API requests
+
+GATEWAY --> DASHBOARD : responses, notifications
+GATEWAY --> EXTERNAL : callbacks, webhooks
+
+@enduml

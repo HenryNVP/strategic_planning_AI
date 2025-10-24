@@ -1,0 +1,36 @@
+@startuml service_layer_details
+title Service Layer – Agent API Components
+
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam rectangle {
+  BackgroundColor #1F2430
+  FontColor #FFFFFF
+  BorderColor #4A90E2
+}
+
+rectangle "Agent API (FastAPI)\n/services/agent_ai" as AGENT {
+  rectangle "API Gateway & Middleware\n(auth, rate limiting, CORS)" as MIDDLEWARE
+  rectangle "Auth & Session Module\n(guest + authenticated flows)" as AUTH
+  rectangle "Chatbot Controller\n/chatbot endpoints" as CHAT
+  rectangle "Document Proxy\n/documents endpoints" as DOCS
+  rectangle "LangGraph Orchestrator\n(state, tools, retries)" as GRAPH
+  rectangle "Observability Hooks\n(Prometheus, Langfuse)" as OBS
+}
+
+rectangle "External Services" as EXT {
+  rectangle "RAG API\n/vector search, embeddings" as RAG
+  rectangle "Analysis Layer API\n/analysis workflows" as ANALYSIS
+  rectangle "LLM Providers\n(OpenAI, Gemini)" as LLM
+  rectangle "Observability Stack\n(Prometheus, Grafana, Langfuse)" as PROM
+}
+
+AUTH --> MIDDLEWARE : JWT validation, rate limiting
+CHAT --> GRAPH : invoke workflows
+DOCS --> RAG : upload, chunk, list
+GRAPH --> RAG : rag_search tool
+GRAPH --> ANALYSIS : rules/scenario/optimization tools
+GRAPH --> LLM : prompt completion
+OBS --> PROM : metrics & traces
+
+@enduml
