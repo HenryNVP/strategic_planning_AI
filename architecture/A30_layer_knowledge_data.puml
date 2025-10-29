@@ -1,5 +1,5 @@
 @startuml A30_layer_knowledge_data
-title Knowledge Layer – RAG Service Components
+title Knowledge/Data Layer – Storage & Retrieval
 
 skinparam shadowing false
 skinparam defaultFontName Arial
@@ -9,95 +9,70 @@ skinparam rectangle {
   BorderThickness 1
 }
 
-rectangle "RAG Service (FastAPI)\nservices/rag_api" as RAG_SERVICE {
-  rectangle "Security Middleware\n(JWT validation)" as SECURITY
+package "Knowledge/Data Layer - Storage" as KNOWLEDGE_LAYER {
   
-  package "Ingestion Pipeline" as INGESTION {
-    rectangle "Document Upload\n(/embed, /embed-upload)" as UPLOAD
-    rectangle "File Loader\n(PDF, CSV, DOCX, etc.)" as LOADER
-    rectangle "Text Extraction\n& Cleaning" as EXTRACTOR
-    rectangle "Text Chunking\n(RecursiveCharacterTextSplitter)" as CHUNKER
-    rectangle "Embedding Generator\n(async workers)" as EMBEDDER
-    rectangle "Entity Extractor\n(NER, relationship extraction)" as NER
+  rectangle "**Relational Database**\nPostgres" as RELATIONAL_DB {
+    rectangle "**Application Data**\n• Users & sessions\n• Conversation state\n• Checkpoints\n• Workflow data" as APP_DATA
+    rectangle "**University Domain Data**\n• Courses & programs\n• Students & enrollments\n• Faculty & departments\n• Resources & budgets" as DOMAIN_DATA
   }
   
-  package "Query Pipeline" as QUERY_PIPE {
-    rectangle "Vector Search\n(/query, /query_multiple)" as SEARCH
-    rectangle "Similarity Ranking\n(pgvector)" as RANKING
-    rectangle "Graph Query\n(Cypher)" as GRAPH_QUERY
-    rectangle "Hybrid Retrieval\n(vector + graph)" as HYBRID
-    rectangle "Context Retrieval" as RETRIEVAL
+  rectangle "**Vector Store**\nPostgres + pgvector" as VECTOR_STORE {
+    rectangle "• Document chunks\n• Vector embeddings\n• Metadata\n• Similarity indices" as VECTOR_CORE
+  }
+  
+  rectangle "**Knowledge Graph**\nNeo4j" as KNOWLEDGE_GRAPH {
+    rectangle "• Entity nodes\n• Relationships\n• Domain ontology\n• Graph indices" as GRAPH_CORE
   }
 }
 
-database "Postgres + pgvector" as DB {
-  rectangle "Document Chunks\n(text, metadata)" as CHUNKS
-  rectangle "Vector Embeddings\n(pgvector)" as EMBEDDINGS
-}
+' Services that use this layer
+cloud "Agent Service\n(Layer 20 - Port 8000)" as AGENT_SERVICE
+cloud "RAG Service\n(Layer 20 - Port 8080)" as RAG_SERVICE
+cloud "Analysis Service\n(Layer 20 - Port 8090)" as ANALYSIS_SERVICE
+cloud "OpenAI\nEmbeddings API" as OPENAI
 
-database "Neo4j Graph DB" as NEO4J {
-  rectangle "Entity Nodes\n(people, orgs, concepts)" as ENTITIES
-  rectangle "Relationships\n(edges, properties)" as RELATIONS
-  rectangle "Domain Ontology\n(schema, rules)" as SCHEMA
-}
+' Agent Service uses Application Data
+AGENT_SERVICE --> APP_DATA : sessions, users, checkpoints
 
-cloud "OpenAI\nEmbeddings API" as EMB_SERVICE
+' RAG Service uses Vector Store & Graph
+RAG_SERVICE --> OPENAI : generate embeddings
+RAG_SERVICE --> VECTOR_STORE : chunks + vectors
+RAG_SERVICE --> KNOWLEDGE_GRAPH : entities + relations
 
-' Ingestion flow
-SECURITY --> UPLOAD : validate request
-UPLOAD --> LOADER : load file
-LOADER --> EXTRACTOR : extract text
-EXTRACTOR --> CHUNKER : clean & chunk
-CHUNKER --> EMBEDDER : generate embeddings
-CHUNKER --> NER : extract entities
-EMBEDDER --> EMB_SERVICE : API call
-EMB_SERVICE --> EMBEDDER : return vectors
-EMBEDDER --> CHUNKS : store chunks
-EMBEDDER --> EMBEDDINGS : store vectors
-NER --> ENTITIES : create nodes
-NER --> RELATIONS : create edges
-NER --> SCHEMA : update ontology
+' Analysis Service uses both Application & Domain Data
+ANALYSIS_SERVICE --> APP_DATA : workflow state, results
+ANALYSIS_SERVICE --> DOMAIN_DATA : query university data for analysis
 
-' Query flow
-SECURITY --> SEARCH : validate request
-SEARCH --> RANKING : vector similarity
-SEARCH --> GRAPH_QUERY : graph traversal
-RANKING --> EMBEDDINGS : vector lookup
-GRAPH_QUERY --> ENTITIES : find entities
-GRAPH_QUERY --> RELATIONS : traverse paths
-RANKING --> HYBRID : vector results
-GRAPH_QUERY --> HYBRID : graph results
-HYBRID --> RETRIEVAL : merge & rank
-RETRIEVAL --> CHUNKS : fetch content
+note bottom of RELATIONAL_DB
+**Relational Database** (Postgres)
+**Application Data:**
+- Users, sessions, auth
+- Checkpoints (LangGraph)
+- Workflow state
 
-note bottom of INGESTION
-**Data Ingestion Pipeline:**
-- Supports 15+ file formats
-- Encoding detection (UTF-8, UTF-16, etc.)
-- Configurable chunk size & overlap
-- Parallel embedding generation
-- Entity & relationship extraction (NER)
-- Metadata tracking (file_id, user_id, digest)
+**University Domain Data:**
+- Courses, programs, departments
+- Student enrollments, grades
+- Faculty, staff, resources
+- Budget, financial data
+- Used by Analysis Service
 end note
 
-note bottom of QUERY_PIPE
-**Hybrid Query Pipeline:**
-- Vector similarity search (semantic)
-- Graph traversal (structural relationships)
-- Hybrid retrieval (vector + graph)
-- Configurable top-k results
-- Multi-file query support
-- User-based access control
+note bottom of VECTOR_STORE
+**Vector Store**
+Same Postgres + pgvector extension
+- Document chunks (text)
+- Vector embeddings
+- Similarity search
 end note
 
-note right of NEO4J
-**Knowledge Graph Features:**
-- Entity recognition & linking
-- Relationship extraction
-- Graph-based reasoning
-- Cypher query language
-- Domain ontology modeling
-- Graph analytics & traversal
+note bottom of KNOWLEDGE_GRAPH
+**Knowledge Graph**
+Separate Neo4j instance
+- Entity nodes
+- Relationships
+- Domain ontology
+- Graph traversal
 end note
 
 @enduml

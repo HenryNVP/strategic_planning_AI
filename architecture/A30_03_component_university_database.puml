@@ -1,0 +1,75 @@
+@startuml A30_03_component_university_database
+
+title University Database Schema - Domain Data for Analysis
+
+skinparam rectangle {
+  BorderColor #000000
+  BorderThickness 1
+}
+
+package "University Domain Database (Postgres)" as UNIVERSITY_DB {
+  
+  rectangle "**Academic Structure**" as ACADEMIC {
+    rectangle "• Departments\n• Programs/Degrees\n• Courses\n• Prerequisites\n• Course sections" as ACADEMIC_TABLES
+  }
+  
+  rectangle "**People Management**" as PEOPLE {
+    rectangle "• Students\n• Faculty\n• Staff\n• Advisors\n• Roles & permissions" as PEOPLE_TABLES
+  }
+  
+  rectangle "**Enrollment & Records**" as ENROLLMENT {
+    rectangle "• Student enrollments\n• Grades & transcripts\n• Attendance\n• Course history\n• Graduation status" as ENROLLMENT_TABLES
+  }
+  
+  rectangle "**Resources & Facilities**" as RESOURCES {
+    rectangle "• Classrooms\n• Labs & equipment\n• Library resources\n• Scheduling/calendars\n• Room assignments" as RESOURCE_TABLES
+  }
+  
+  rectangle "**Financial Management**" as FINANCIAL {
+    rectangle "• Budgets\n• Tuition & fees\n• Financial aid\n• Payroll\n• Expenses & revenue" as FINANCIAL_TABLES
+  }
+  
+  rectangle "**Research & Projects**" as RESEARCH {
+    rectangle "• Research projects\n• Grants & funding\n• Publications\n• Collaborations\n• Intellectual property" as RESEARCH_TABLES
+  }
+}
+
+' Analysis Service queries
+cloud "Analysis Service\n(Layer 20)" as ANALYSIS_SERVICE
+
+ANALYSIS_SERVICE --> ACADEMIC : course demand, program trends
+ANALYSIS_SERVICE --> PEOPLE : faculty workload, staffing
+ANALYSIS_SERVICE --> ENROLLMENT : student success, retention
+ANALYSIS_SERVICE --> RESOURCES : utilization, capacity planning
+ANALYSIS_SERVICE --> FINANCIAL : budget optimization, forecasting
+ANALYSIS_SERVICE --> RESEARCH : research productivity, ROI
+
+note right of ANALYSIS_SERVICE
+**Analysis Use Cases:**
+- Strategic enrollment planning
+- Resource allocation optimization
+- Faculty workload balancing
+- Budget forecasting & scenarios
+- Program performance analysis
+- Student success prediction
+- Capacity planning
+- Financial sustainability
+end note
+
+note bottom of UNIVERSITY_DB
+**Data Sources:**
+- Student Information System (SIS)
+- Financial/ERP system
+- HR/Payroll system
+- Learning Management System (LMS)
+- Research administration system
+
+**Data Integration:**
+- ETL pipelines from source systems
+- Real-time sync or scheduled updates
+- Data validation & cleansing
+- Historical data retention
+end note
+
+@enduml
+
