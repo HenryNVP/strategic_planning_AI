@@ -51,18 +51,15 @@ Core business logic microservices - one overview + details for each service.
 ---
 
 ### 🔄 Layer 4: Flows & Sequences
-**Runtime flows and data pipelines** - How services interact and process data.
+**Runtime flows** - Simplified view of how services interact.
 
 | File | Description |
 |------|-------------|
-| `A4_00_flow_overview` | **Overview** - All runtime flows together (comprehensive) |
-| `A4_01_flow_ingestion_pipeline` | **Document Ingestion** - RAG Service processing (14 steps) |
-| `A4_02_flow_session_auth` | **Session & Auth** - Guest/user sessions, JWT validation |
-| `A4_03a_flow_chat_sync` | **Chat (Sync)** - Standard request/response |
-| `A4_03b_flow_chat_stream` | **Chat (Streaming)** - Real-time SSE token delivery |
-| `A4_03c_flow_chat_history` | **Chat History** - Get & clear conversation |
-| `A4_04_flow_analysis_workflow` | **Analysis Workflow (Simplified)** - Strategic decisions |
-| `A4_04_flow_analysis_detailed` | **Analysis Workflow (Detailed)** - Full execution flow |
+| `A4_00_flow_overview` | **Overview** - All flows combined (detailed reference) |
+| `A4_01_flow_ingestion` | **Document Upload** - User → RAG → Storage |
+| `A4_02_flow_session_auth` | **Session & Auth** - Login, JWT, logout |
+| `A4_03_flow_chat` | **Chat** - Sync, streaming, & history (all-in-one) |
+| `A4_04_flow_analysis` | **Analysis** - Strategic workflow execution |
 
 ---
 
@@ -89,15 +86,13 @@ Core business logic microservices - one overview + details for each service.
 → See: `A3_02_component_university_database`
 
 ### 📍 **"I want to trace user request flows"**
-→ Start: `A4_00_flow_overview` (comprehensive overview)
-→ Focused flows:
-  - **Session/Auth**: `A4_02_flow_session_auth`
-  - **Chat (Sync)**: `A4_03a_flow_chat_sync`
-  - **Chat (Streaming)**: `A4_03b_flow_chat_stream`
-  - **Chat History**: `A4_03c_flow_chat_history`
-  - **Analysis (Simple)**: `A4_04_flow_analysis_workflow`
-  - **Analysis (Detailed)**: `A4_04_flow_analysis_detailed`
-  - **Document Upload**: `A4_01_flow_ingestion_pipeline`
+→ **Quick reference** (simplified):
+  - **Login**: `A4_02_flow_session_auth`
+  - **Chat**: `A4_03_flow_chat` (sync, stream, history)
+  - **Document Upload**: `A4_01_flow_ingestion`
+  - **Analysis**: `A4_04_flow_analysis`
+→ **Detailed reference**: `A4_00_flow_overview` (all flows combined)
+→ **Very detailed**: See `_detailed_backup/` folder
 
 ---
 
@@ -118,12 +113,11 @@ Core business logic microservices - one overview + details for each service.
 │   └─ Neo4j (graph)                      │  
 │      └─ A3_01: Knowledge Graph          │  - Entity relationships
 ├─────────────────────────────────────────┤
-│   Layer 4: Flows & Sequences            │  How services work:
-│   ├─ A4_00: Overview (all flows)        │  - High-level view
-│   ├─ A4_01: Document ingestion          │  - Upload → Storage
+│   Layer 4: Flows (Simplified)           │  How services work:
+│   ├─ A4_01: Document upload             │  - User → Storage
 │   ├─ A4_02: Session & auth              │  - Login & JWT
-│   ├─ A4_03: Chat with RAG               │  - Conversation flow
-│   └─ A4_04: Analysis workflow           │  - Strategic decisions
+│   ├─ A4_03: Chat                        │  - Sync/stream/history
+│   └─ A4_04: Analysis                    │  - Strategic workflow
 └─────────────────────────────────────────┘
 ```
 

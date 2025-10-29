@@ -20,15 +20,14 @@
 - `A3_01_component_neo4j_graph.{puml,png}` - Neo4j knowledge graph
 - `A3_02_component_university_database.{puml,png}` - University database schema
 
-### Layer 4: Flows & Sequences
-- `A4_00_flow_overview.{puml,png}` - Overview of all runtime flows (comprehensive)
-- `A4_01_flow_ingestion_pipeline.{puml,png}` - Document ingestion (RAG Service, 14 steps)
-- `A4_02_flow_session_auth.{puml,png}` - Session & authentication (guest/user, JWT)
-- `A4_03a_flow_chat_sync.{puml,png}` - Chat sync mode (standard request/response)
-- `A4_03b_flow_chat_stream.{puml,png}` - Chat streaming mode (SSE, real-time)
-- `A4_03c_flow_chat_history.{puml,png}` - Chat history (get & clear)
-- `A4_04_flow_analysis_workflow.{puml,png}` - Analysis workflow (simplified)
-- `A4_04_flow_analysis_detailed.{puml,png}` - Analysis workflow (detailed, all phases)
+### Layer 4: Flows & Sequences (Simplified)
+- `A4_00_flow_overview.{puml,png}` - Overview (all flows combined, detailed)
+- `A4_01_flow_ingestion.{puml,png}` - Document upload (user → storage)
+- `A4_02_flow_session_auth.{puml,png}` - Session & auth (login, JWT, logout)
+- `A4_03_flow_chat.{puml,png}` - Chat (sync, streaming, history all-in-one)
+- `A4_04_flow_analysis.{puml,png}` - Analysis workflow (simplified)
+
+**Detailed versions available in:** `_detailed_backup/` folder
 
 ---
 

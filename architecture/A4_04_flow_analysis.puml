@@ -1,0 +1,44 @@
+@startuml A4_04_flow_analysis_simple
+title Analysis Workflow (Simplified)
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+
+actor User
+participant "Agent" as AGENT
+participant "Analysis Service" as ANALYSIS
+participant "RAG Service" as RAG
+database "Domain Data" as DB
+
+== Start Analysis ==
+User -> AGENT : "Analyze enrollment"
+AGENT -> ANALYSIS : start workflow
+ANALYSIS --> AGENT : workflow_id
+AGENT --> User : "Starting analysis..."
+
+== Execute ==
+ANALYSIS -> RAG : get context
+RAG --> ANALYSIS : historical data
+
+ANALYSIS -> DB : get university data
+DB --> ANALYSIS : enrollments, courses, etc.
+
+ANALYSIS -> ANALYSIS : validate rules
+
+ANALYSIS -> ANALYSIS : run scenarios
+note right
+Scenario 1: Current trend
+Scenario 2: Increased capacity
+Scenario 3: Reduced resources
+end note
+
+ANALYSIS -> DB : save results
+
+== Complete ==
+ANALYSIS --> AGENT : results ready
+AGENT -> ANALYSIS : get results
+ANALYSIS --> AGENT : findings
+AGENT --> User : "Analysis complete:\n[Summary]"
+
+@enduml
