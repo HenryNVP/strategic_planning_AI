@@ -1,0 +1,121 @@
+@startuml service_layer_details
+title Microservices – Service Layer Architecture
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam rectangle {
+  BorderColor #000000
+  BorderThickness 1
+}
+
+package "Microservice 1: Agent Service" as AGENT_MS {
+  rectangle "**services/agent_ai**\nPort: 8000\nLanguage: Python" as AGENT_HEADER
+  
+  package "Core Components" as AGENT_CORE {
+    rectangle "API Gateway & Middleware\n(auth, rate limiting, CORS)" as MIDDLEWARE
+    rectangle "Auth & Session Controller\n(/api/v1/auth/*)" as AUTH
+    rectangle "Chatbot Controller\n(/api/v1/chatbot/*)" as CHAT
+    rectangle "Document Proxy Controller\n(/api/v1/documents/*)" as DOCS
+  }
+  
+  package "Business Logic" as AGENT_LOGIC {
+    rectangle "LangGraph Agent\n(state machine, tools, memory)" as GRAPH
+    rectangle "Tool Orchestration\n(RAG search, web search, analysis)" as TOOLS
+    rectangle "Session Manager\n(guest & authenticated)" as SESSION
+  }
+  
+  package "Observability" as AGENT_OBS {
+    rectangle "Prometheus Metrics" as METRICS
+    rectangle "Langfuse Tracing" as TRACING
+    rectangle "Structured Logging" as LOGGING
+  }
+}
+
+package "Microservice 2: RAG Service" as RAG_MS {
+  rectangle "**services/rag_api**\nPort: 8080\nLanguage: Python" as RAG_HEADER
+  
+  package "Core Components" as RAG_CORE {
+    rectangle "Security Middleware\n(JWT validation)" as RAG_SEC
+    rectangle "Document Controller\n(/embed, /query)" as RAG_DOC
+    rectangle "Vector Search Controller\n(/query_multiple)" as RAG_SEARCH
+  }
+  
+  package "Business Logic" as RAG_LOGIC {
+    rectangle "Document Processing Pipeline\n(load, extract, chunk)" as PIPELINE
+    rectangle "Embedding Generator\n(async workers)" as EMBEDDINGS
+    rectangle "Vector Store Manager\n(pgvector operations)" as VECTOR_MGR
+    rectangle "Graph Store Manager\n(Neo4j operations)" as GRAPH_MGR
+    rectangle "Entity Extractor\n(NER, relationships)" as NER
+  }
+}
+
+package "Microservice 3: Analysis Service" as ANALYSIS_MS {
+  rectangle "**Future Implementation**\nPort: 8090\nLanguage: Python" as ANALYSIS_HEADER
+  
+  package "Core Components" as ANALYSIS_CORE {
+    rectangle "Workflow Controller\n(/analysis/*)" as WORKFLOW_CTRL
+    rectangle "Rules Engine\n(compliance validation)" as RULES
+    rectangle "Scenario Simulator\n(parallel execution)" as SCENARIOS
+    rectangle "Optimization Solver\n(strategy generation)" as OPTIMIZER
+  }
+}
+
+' External dependencies
+database "Postgres\n+ pgvector" as DB
+database "Neo4j\nKnowledge Graph" as NEO4J
+cloud "OpenAI API\n(LLM + Embeddings)" as OPENAI
+cloud "Observability\n(Prometheus, Grafana, Langfuse)" as OBS_STACK
+
+' Service interactions
+AGENT_MS --> RAG_MS : HTTP REST + JWT\n(document operations, RAG search)
+AGENT_MS --> ANALYSIS_MS : HTTP REST\n(analysis workflows)
+ANALYSIS_MS --> RAG_MS : HTTP REST\n(context retrieval)
+
+' Database connections
+AUTH --> DB : users, sessions
+GRAPH --> DB : checkpoints, state
+VECTOR_MGR --> DB : vector storage
+GRAPH_MGR --> NEO4J : entity/relationship storage
+RULES --> DB : workflow state
+
+' External API calls
+GRAPH --> OPENAI : LLM completions
+EMBEDDINGS --> OPENAI : text embeddings
+
+' Observability
+AGENT_OBS --> OBS_STACK
+RAG_MS --> OBS_STACK
+ANALYSIS_MS --> OBS_STACK
+
+note bottom of AGENT_MS
+**Agent Service Characteristics:**
+- Main entry point for all user interactions
+- Stateful (manages conversation context)
+- Orchestrates calls to other services
+- Handles authentication & authorization
+- Implements rate limiting & security
+- Technology: FastAPI + LangGraph + SQLModel
+end note
+
+note bottom of RAG_MS
+**RAG Service Characteristics:**
+- Stateless (no session management)
+- Handles all document processing
+- Manages vector & graph storage
+- Supports 15+ file formats
+- Parallel embedding generation
+- Technology: FastAPI + LangChain + pgvector + Neo4j
+end note
+
+note bottom of ANALYSIS_MS
+**Analysis Service Characteristics:**
+- Compute-intensive operations
+- Long-running workflows
+- Parallel scenario execution
+- Task queue for async processing
+- Can scale independently
+- Technology: FastAPI + Celery + Ray + Redis
+end note
+
+@enduml

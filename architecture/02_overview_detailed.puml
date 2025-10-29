@@ -28,9 +28,9 @@ package "Client Layer" as CLIENT {
   [External Integrations\n(REST clients, tools)] <<client>> as EXT_CLIENTS
 }
 
-' === Service Layer ===
-package "Service Layer\nservices/agent_ai" as SERVICE_LAYER {
-  package "Agent Service\n(Handles: Agent Orchestration + APIs + RAG Calls)" as AGENT_SERVICE {
+' === Service Layer (Microservices) ===
+package "Service Layer - Microservices" as SERVICE_LAYER {
+  package "Agent Service\nservices/agent_ai\n(Port 8000)" as AGENT_SERVICE {
     [Auth & Session API\n(/api/v1/auth/*)] <<service>> as AUTH_API
     [Chatbot API\n(/api/v1/chatbot/*)] <<service>> as CHAT_API
     [Document Proxy API\n(/api/v1/documents/*)] <<service>> as DOC_PROXY
@@ -38,7 +38,7 @@ package "Service Layer\nservices/agent_ai" as SERVICE_LAYER {
     [Metrics & Tracing\n(Prometheus, Langfuse)] <<service>> as OBS_AGENT
   }
   
-  package "Analysis Components\n(strategic workflows)" as ANALYSIS_COMPONENTS {
+  package "Analysis Service\n(Future)\n(Port 8090)" as ANALYSIS_SERVICE {
     [Decision & Governance\n(approvals, explainability)] <<service>> as DECISION
     [Rules & Compliance\n(policy & budget checks)] <<service>> as RULES
     [Scenario Simulation\n(parallel evaluation)] <<service>> as SCENARIO
@@ -123,12 +123,15 @@ ONTOLOGY --> NEO4J
 
 ' === Notes ===
 note bottom of SERVICE_LAYER
-**Main Service Layer**
-- Agent Service: FastAPI + uvicorn with LangGraph orchestration
-- Manages all API endpoints, authentication, sessions
-- Orchestrates RAG calls to rag_api service
-- Analysis Components: Strategic workflows (decision, rules, scenarios)
-- Optional anonymous sessions (guest user)
+**Service Layer - Microservices Architecture**
+- Agent Service (Port 8000): Main orchestration hub
+  * FastAPI + LangGraph + SQLModel
+  * Manages authentication, sessions, chat API
+  * Orchestrates calls to RAG & Analysis services
+- RAG Service (Port 8080): Document processing & search
+- Analysis Service (Port 8090): Strategic workflows
+  * Decision, rules, scenarios, optimization
+  * Future implementation
 end note
 
 note bottom of RAG_SERVICE

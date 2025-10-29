@@ -15,17 +15,15 @@ rectangle "Client Layer\n(UI + Integrations)" as CLIENT {
   rectangle "External Consumers" as EXT
 }
 
-rectangle "Service Layer\nservices/agent_ai\nHandles: Agent Orchestration + APIs + RAG Calls + Analysis" as SERVICE {
-  rectangle "LangGraph Agent\n(orchestration, tools, memory)" as AGENT
-  rectangle "API Endpoints\n(auth, chat, documents)" as APIS
-  rectangle "RAG Integration\n(calls to RAG service)" as RAG_INT
-  rectangle "Analysis Components\n(decision, rules, scenarios)" as ANALYSIS_COMP
+rectangle "Service Layer\n(Microservices)" as SERVICE {
+  rectangle "Agent Service\n(Port 8000)\norchestration, APIs, tools" as AGENT_SVC
+  rectangle "RAG Service\n(Port 8080)\ndocument processing, search" as RAG_SVC
+  rectangle "Analysis Service\n(Port 8090)\nstrategic workflows" as ANALYSIS_SVC
 }
 
-rectangle "Knowledge Layer\nRAG Service (rag_api)\n(Vector Store + Knowledge Graph)" as KNOWLEDGE {
-  rectangle "Vector Store\n(pgvector)" as VSTORE
+rectangle "Knowledge / Data Layer\n(Storage)" as KNOWLEDGE {
+  rectangle "Vector Store\n(Postgres + pgvector)" as VSTORE
   rectangle "Knowledge Graph\n(Neo4j)" as KGRAPH
-  rectangle "Embeddings & Search\n(document chunks)" as SEARCH
 }
 
 database "Postgres + pgvector\n(sessions, vectors, state)" as DB
