@@ -10,9 +10,10 @@
 - `10_layer_client.{puml,png}` - Client layer (UI, integrations)
 
 ### Layer 20: Service (Microservices)
-- `20_layer_service_microservices.{puml,png}` - Service layer overview
-- `20_01_component_microservices_detail.{puml,png}` - Microservices detailed breakdown
-- `20_02_component_analysis_service.{puml,png}` - Analysis service component
+- `20_layer_service_microservices.{puml,png}` - Compact overview of all 3 microservices
+- `20_01_component_agent_service.{puml,png}` - Agent service detailed components
+- `20_02_component_rag_service.{puml,png}` - RAG service detailed components
+- `20_03_component_analysis_service.{puml,png}` - Analysis service detailed components
 
 ### Layer 30: Knowledge/Data
 - `30_layer_knowledge_data.{puml,png}` - Knowledge layer overview

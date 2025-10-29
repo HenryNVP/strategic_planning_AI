@@ -1,5 +1,5 @@
-@startuml service_layer_details
-title Microservices – Service Layer Architecture
+@startuml service_layer_microservices
+title Service Layer – Microservices Overview
 
 skinparam shadowing false
 skinparam defaultFontName Arial
@@ -9,113 +9,61 @@ skinparam rectangle {
   BorderThickness 1
 }
 
-package "Microservice 1: Agent Service" as AGENT_MS {
-  rectangle "**services/agent_ai**\nPort: 8000\nLanguage: Python" as AGENT_HEADER
+package "Service Layer - Microservices" as SERVICE_LAYER {
   
-  package "Core Components" as AGENT_CORE {
-    rectangle "API Gateway & Middleware\n(auth, rate limiting, CORS)" as MIDDLEWARE
-    rectangle "Auth & Session Controller\n(/api/v1/auth/*)" as AUTH
-    rectangle "Chatbot Controller\n(/api/v1/chatbot/*)" as CHAT
-    rectangle "Document Proxy Controller\n(/api/v1/documents/*)" as DOCS
+  rectangle "**Agent Service**\nservices/agent_ai\nPort: 8000" as AGENT {
+    rectangle "• LangGraph orchestration\n• Chat API (sync/stream)\n• Auth & sessions\n• Tool coordination" as AGENT_CORE
   }
   
-  package "Business Logic" as AGENT_LOGIC {
-    rectangle "LangGraph Agent\n(state machine, tools, memory)" as GRAPH
-    rectangle "Tool Orchestration\n(RAG search, web search, analysis)" as TOOLS
-    rectangle "Session Manager\n(guest & authenticated)" as SESSION
+  rectangle "**RAG Service**\nservices/rag_api\nPort: 8080" as RAG {
+    rectangle "• Document processing\n• Vector search (pgvector)\n• Knowledge graph (Neo4j)\n• Entity extraction" as RAG_CORE
   }
   
-  package "Observability" as AGENT_OBS {
-    rectangle "Prometheus Metrics" as METRICS
-    rectangle "Langfuse Tracing" as TRACING
-    rectangle "Structured Logging" as LOGGING
+  rectangle "**Analysis Service**\nservices/analysis_api\nPort: 8090" as ANALYSIS {
+    rectangle "• Strategic workflows\n• Rules & compliance\n• Scenario simulation\n• Optimization" as ANALYSIS_CORE
   }
 }
 
-package "Microservice 2: RAG Service" as RAG_MS {
-  rectangle "**services/rag_api**\nPort: 8080\nLanguage: Python" as RAG_HEADER
-  
-  package "Core Components" as RAG_CORE {
-    rectangle "Security Middleware\n(JWT validation)" as RAG_SEC
-    rectangle "Document Controller\n(/embed, /query)" as RAG_DOC
-    rectangle "Vector Search Controller\n(/query_multiple)" as RAG_SEARCH
-  }
-  
-  package "Business Logic" as RAG_LOGIC {
-    rectangle "Document Processing Pipeline\n(load, extract, chunk)" as PIPELINE
-    rectangle "Embedding Generator\n(async workers)" as EMBEDDINGS
-    rectangle "Vector Store Manager\n(pgvector operations)" as VECTOR_MGR
-    rectangle "Graph Store Manager\n(Neo4j operations)" as GRAPH_MGR
-    rectangle "Entity Extractor\n(NER, relationships)" as NER
-  }
-}
-
-package "Microservice 3: Analysis Service" as ANALYSIS_MS {
-  rectangle "**Future Implementation**\nPort: 8090\nLanguage: Python" as ANALYSIS_HEADER
-  
-  package "Core Components" as ANALYSIS_CORE {
-    rectangle "Workflow Controller\n(/analysis/*)" as WORKFLOW_CTRL
-    rectangle "Rules Engine\n(compliance validation)" as RULES
-    rectangle "Scenario Simulator\n(parallel execution)" as SCENARIOS
-    rectangle "Optimization Solver\n(strategy generation)" as OPTIMIZER
-  }
-}
-
-' External dependencies
 database "Postgres\n+ pgvector" as DB
-database "Neo4j\nKnowledge Graph" as NEO4J
-cloud "OpenAI API\n(LLM + Embeddings)" as OPENAI
-cloud "Observability\n(Prometheus, Grafana, Langfuse)" as OBS_STACK
+database "Neo4j" as NEO4J
+cloud "OpenAI" as OPENAI
+cloud "Observability" as OBS
 
 ' Service interactions
-AGENT_MS --> RAG_MS : HTTP REST + JWT\n(document operations, RAG search)
-AGENT_MS --> ANALYSIS_MS : HTTP REST\n(analysis workflows)
-ANALYSIS_MS --> RAG_MS : HTTP REST\n(context retrieval)
+AGENT --> RAG : HTTP + JWT\nRAG search, docs
+AGENT --> ANALYSIS : HTTP\nanalysis workflows
+ANALYSIS --> RAG : HTTP\ncontext retrieval
 
-' Database connections
-AUTH --> DB : users, sessions
-GRAPH --> DB : checkpoints, state
-VECTOR_MGR --> DB : vector storage
-GRAPH_MGR --> NEO4J : entity/relationship storage
-RULES --> DB : workflow state
+' Data connections
+AGENT --> DB : sessions, state
+RAG --> DB : vectors
+RAG --> NEO4J : graph
+ANALYSIS --> DB : workflows
 
-' External API calls
-GRAPH --> OPENAI : LLM completions
-EMBEDDINGS --> OPENAI : text embeddings
+' External
+AGENT --> OPENAI : LLM
+RAG --> OPENAI : embeddings
+AGENT --> OBS
+RAG --> OBS
+ANALYSIS --> OBS
 
-' Observability
-AGENT_OBS --> OBS_STACK
-RAG_MS --> OBS_STACK
-ANALYSIS_MS --> OBS_STACK
-
-note bottom of AGENT_MS
-**Agent Service Characteristics:**
-- Main entry point for all user interactions
-- Stateful (manages conversation context)
-- Orchestrates calls to other services
-- Handles authentication & authorization
-- Implements rate limiting & security
-- Technology: FastAPI + LangGraph + SQLModel
+note right of AGENT
+**Stateful Orchestrator**
+FastAPI + LangGraph + SQLModel
+Main entry point for users
 end note
 
-note bottom of RAG_MS
-**RAG Service Characteristics:**
-- Stateless (no session management)
-- Handles all document processing
-- Manages vector & graph storage
-- Supports 15+ file formats
-- Parallel embedding generation
-- Technology: FastAPI + LangChain + pgvector + Neo4j
+note right of RAG
+**Stateless Data Service**
+FastAPI + LangChain
+Storage (vector + graph)
 end note
 
-note bottom of ANALYSIS_MS
-**Analysis Service Characteristics:**
-- Compute-intensive operations
-- Long-running workflows
-- Parallel scenario execution
-- Task queue for async processing
-- Can scale independently
-- Technology: FastAPI + Celery + Ray + Redis
+note right of ANALYSIS
+**Compute Service**
+FastAPI + Celery + Ray
+Long-running workflows
+Task queue (Redis)
 end note
 
 @enduml

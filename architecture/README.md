@@ -28,13 +28,14 @@ User-facing components and external integrations.
 ---
 
 ### 🔷 Layer 20: Service Layer (Microservices)
-Core business logic microservices.
+Core business logic microservices - one overview + details for each service.
 
 | File | Description |
 |------|-------------|
-| `20_layer_service_microservices` | **Service Layer Overview** - All microservices architecture |
-| `20_01_component_microservices_detail` | **Microservices Detail** - Deep dive into each service (Agent, RAG, Analysis) |
-| `20_02_component_analysis_service` | **Analysis Service** - Strategic workflows component details |
+| `20_layer_service_microservices` | **Microservices Overview** - Compact view of all 3 services |
+| `20_01_component_agent_service` | **Agent Service Detail** - LangGraph orchestration, APIs, tools |
+| `20_02_component_rag_service` | **RAG Service Detail** - Document processing, vector + graph storage |
+| `20_03_component_analysis_service` | **Analysis Service Detail** - Strategic workflows, rules, scenarios |
 
 ---
 
@@ -66,7 +67,8 @@ Data storage and knowledge management.
 → Look at: `02_overview_detailed`
 
 ### 📍 **"I'm implementing the microservices"**
-→ Review: `20_layer_service_microservices` and `20_01_component_microservices_detail`
+→ Start: `20_layer_service_microservices` (overview)
+→ Then: `20_01` (Agent), `20_02` (RAG), `20_03` (Analysis)
 
 ### 📍 **"I'm working on document processing"**
 → Study: `30_01_component_ingestion_pipeline` and `30_layer_knowledge_data`
@@ -87,8 +89,8 @@ Data storage and knowledge management.
 ├─────────────────────────────────────────┤
 │   Layer 20: Service Layer               │  Microservices:
 │   ├─ 20_01: Agent Service (8000)        │  - Main orchestration
-│   ├─ 20_01: RAG Service (8080)          │  - Document processing  
-│   └─ 20_02: Analysis Service (8090)     │  - Strategic workflows
+│   ├─ 20_02: RAG Service (8080)          │  - Document processing  
+│   └─ 20_03: Analysis Service (8090)     │  - Strategic workflows
 ├─────────────────────────────────────────┤
 │   Layer 30: Knowledge/Data Layer        │  Storage:
 │   ├─ 30_01: Ingestion Pipeline          │  - Document processing

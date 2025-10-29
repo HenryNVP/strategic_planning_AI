@@ -1,0 +1,107 @@
+@startuml analysis_service_detail
+title Analysis Service – Detailed Components
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam rectangle {
+  BorderColor #000000
+  BorderThickness 1
+}
+
+package "Analysis Service\nservices/analysis_api\nPort: 8090" as ANALYSIS_SERVICE {
+
+package "API Layer" as API_LAYER {
+  rectangle "Workflow Controller\n/api/v1/analysis/*" as WORKFLOW_API
+  rectangle "Rules Controller\n/api/v1/rules/*" as RULES_API
+  rectangle "Scenario Controller\n/api/v1/scenarios/*" as SCENARIO_API
+  rectangle "Optimization Controller\n/api/v1/optimization/*" as OPTIM_API
+}
+
+package "Core Components" as CORE {
+
+rectangle "Decision & Governance\n(orchestration + approvals)" as DECISION {
+  rectangle "Workflow Intake\n(strategy + metadata)" as INTAKE
+  rectangle "Approval & Audit Trail\n(explainability)" as AUDIT
+  rectangle "Dispatcher\n(task fan-out, retries)" as DISPATCH
+}
+
+rectangle "Rules & Compliance Engine\n(policy + budget checks)" as RULES {
+  rectangle "Policy Catalog" as POLICY
+  rectangle "Constraint Solver" as CONSTRAINT
+}
+
+rectangle "Scenario Simulation Service\n(EMA Workbench / Ray)" as SCENARIO {
+  rectangle "Scenario Library" as LIBRARY
+  rectangle "Experiment Runner\n(parallel workers)" as RUNNER
+  rectangle "Metrics Aggregator" as METRICS
+}
+
+rectangle "Optimization Service\n(strategy generation)" as OPTIM {
+  rectangle "Objective Configurator" as OBJECTIVE
+  rectangle "Solver Backend\n(LP/MIP/Heuristics)" as SOLVER
+  rectangle "Recommendation Builder" as RECOMMEND
+}
+
+}
+
+package "Infrastructure" as INFRA {
+  rectangle "Task Queue\n(Celery + Redis)" as QUEUE
+  rectangle "Distributed Compute\n(Ray cluster)" as RAY
+}
+
+}
+
+' External dependencies
+database "Postgres" as DB
+database "Redis" as REDIS
+cloud "RAG Service" as RAG
+cloud "Observability" as OBS
+
+' API flow
+WORKFLOW_API --> INTAKE
+RULES_API --> RULES
+SCENARIO_API --> SCENARIO
+OPTIM_API --> OPTIM
+
+' Workflow orchestration
+INTAKE --> DISPATCH : create workflow
+DISPATCH --> QUEUE : enqueue tasks
+QUEUE --> RULES : compliance job
+QUEUE --> SCENARIO : scenario runs
+QUEUE --> OPTIM : optimization job
+
+' Results storage
+RULES --> DB : validation results
+SCENARIO --> DB : metrics
+OPTIM --> DB : recommendations
+AUDIT --> DB : approvals
+
+' Context retrieval
+SCENARIO --> RAG : baseline data
+OPTIM --> RAG : historical context
+
+' Compute
+SCENARIO --> RAY : parallel execution
+OPTIM --> RAY : distributed solving
+
+' Observability
+ANALYSIS_SERVICE --> OBS
+
+note bottom of ANALYSIS_SERVICE
+**Technology Stack:**
+- FastAPI + Uvicorn
+- Celery (task queue)
+- Ray (distributed compute)
+- Redis (queue backend)
+- Postgres (workflow state)
+
+**Key Features:**
+- Long-running workflows
+- Parallel execution
+- Async task processing
+- Horizontally scalable
+- Strategic decision support
+end note
+
+@enduml

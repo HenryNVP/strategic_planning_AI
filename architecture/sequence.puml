@@ -1,0 +1,104 @@
+@startuml strategic_ai_sequence
+title Strategic Planning AI – Key Runtime Flows
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+
+actor User
+participant "Mock Tester UI\n(browser)" as UI
+participant "Agent API\n(/api/v1/...)" as AGENT
+participant "LangGraph Orchestrator" as LANGGRAPH
+participant "RAG Proxy\n(/api/v1/documents)" as DOC_PROXY
+participant "RAG API\n(/embed, /query)" as RAG_API
+database "Postgres\n(pgvector)" as PG
+database "Knowledge & KPI Store\n(time-series)" as KPI
+participant "Analysis API\n(/api/v1/analysis)" as ANALYSIS
+participant "Decision Hub\n(orchestration)" as DECISION
+participant "Rules Engine" as RULES
+participant "Scenario Service" as SCENARIO
+participant "Optimization Service" as OPTIM
+participant "Embeddings Service\n(OpenAI)" as EMB
+participant "LLM Provider\n(OpenAI)" as LLM
+participant "Langfuse / Metrics" as OBS
+
+== Guest Session bootstrap ==
+User -> UI : Open /ui test console
+UI -> AGENT : POST /auth/session\n(no Authorization header)
+AGENT -> PG : get_or_create_guest_user\n(sqlmodel)
+AGENT -> PG : insert session row + checkpoint thread
+AGENT --> UI : session token (JWT)
+UI -> OBS : store token locally (browser)
+
+== Document ingestion ==
+UI -> DOC_PROXY : POST /documents/upload\n(file, file_id?)
+DOC_PROXY -> RAG_API : POST /embed\n(attach JWT)
+RAG_API -> Embeddings : generate chunk embeddings
+RAG_API -> PG : insert chunks + vectors
+RAG_API --> DOC_PROXY : {status, file_id}
+DOC_PROXY --> UI : success message
+
+== Chat with RAG context ==
+loop per user turn
+  User -> UI : type prompt
+  UI -> AGENT : POST /chatbot/chat\nAuthorization: session token
+  AGENT -> LANGGRAPH : invoke(session_id, messages)
+  group retrieve context
+    LANGGRAPH -> RAG_API : POST /query\n{query, file_ids, JWT}
+    RAG_API -> PG : similarity_search (pgvector)
+    PG --> RAG_API : ranked vectors + metadata
+    RAG_API --> LANGGRAPH : contextual passages
+  end
+  alt analysis workflow requested
+    LANGGRAPH -> ANALYSIS : POST /analysis/workflows\n(strategy_id, flags, context)
+    ANALYSIS -> DECISION : enqueue workflow
+    DECISION -> RULES : evaluate constraints / policies
+    RULES --> DECISION : compliance result
+    DECISION -> SCENARIO : launch scenario set
+    SCENARIO -> KPI : read baseline KPIs
+    SCENARIO --> DECISION : scenario metrics
+    DECISION -> OPTIM : run optimization (optional)
+    OPTIM -> KPI : fetch constraints & history
+    OPTIM --> DECISION : recommendations
+    DECISION -> KPI : persist analysis outputs
+    DECISION --> ANALYSIS : aggregated findings
+    ANALYSIS --> LANGGRAPH : workflow status + evidence
+    ANALYSIS -> OBS : emit telemetry
+  else no analysis needed
+    LANGGRAPH -> OBS : log skipped analysis
+  end
+  LANGGRAPH -> LLM : prompt(messages + context)
+  LLM --> LANGGRAPH : assistant reply
+  LANGGRAPH -> PG : persist checkpoint state
+  LANGGRAPH -> KPI : optional write-back of strategy summary
+  LANGGRAPH --> AGENT : message list
+  AGENT --> UI : ChatResponse (messages)
+  AGENT -> OBS : emit metrics / traces
+end
+
+== Optional stream ==
+UI -> AGENT : POST /chatbot/chat/stream
+AGENT -> LANGGRAPH : astream(...)
+loop SSE chunks
+  LANGGRAPH --> AGENT : token chunk
+  AGENT --> UI : data: {content, done?}
+end
+
+== History management ==
+UI -> AGENT : GET /chatbot/messages
+AGENT -> LANGGRAPH : load_state(thread_id)
+LANGGRAPH -> PG : fetch checkpoints
+PG --> LANGGRAPH : state snapshot
+LANGGRAPH --> AGENT : conversation history
+AGENT --> UI : prior messages
+
+UI -> AGENT : DELETE /chatbot/messages
+AGENT -> PG : delete from checkpoint_* tables
+AGENT --> UI : confirmation
+
+== Monitoring ==
+AGENT -> OBS : Prometheus metrics, Langfuse traces
+RAG_API -> OBS : service metrics / logs
+ANALYSIS -> OBS : workflow telemetry
+
+@enduml

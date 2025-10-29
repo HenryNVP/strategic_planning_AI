@@ -1,0 +1,44 @@
+@startuml architecture_simplified
+title Strategic Planning AI – Simplified View
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam packageStyle rectangle
+skinparam rectangle {
+  BorderColor #000000
+  BorderThickness 1
+}
+
+rectangle "Client Layer\n(UI + Integrations)" as CLIENT {
+  rectangle "Web Dashboard\nMock Tester UI" as UI
+  rectangle "External Consumers" as EXT
+}
+
+rectangle "Service Layer\nservices/agent_ai\nHandles: Agent Orchestration + APIs + RAG Calls + Analysis" as SERVICE {
+  rectangle "LangGraph Agent\n(orchestration, tools, memory)" as AGENT
+  rectangle "API Endpoints\n(auth, chat, documents)" as APIS
+  rectangle "RAG Integration\n(calls to RAG service)" as RAG_INT
+  rectangle "Analysis Components\n(decision, rules, scenarios)" as ANALYSIS_COMP
+}
+
+rectangle "Knowledge Layer\nRAG Service (rag_api)\n(Vector Store + Knowledge Graph)" as KNOWLEDGE {
+  rectangle "Vector Store\n(pgvector)" as VSTORE
+  rectangle "Knowledge Graph\n(Neo4j)" as KGRAPH
+  rectangle "Embeddings & Search\n(document chunks)" as SEARCH
+}
+
+database "Postgres + pgvector\n(sessions, vectors, state)" as DB
+database "Neo4j\n(entities, relationships)" as NEO4J
+cloud "LLM Provider\n(OpenAI)" as LLM
+cloud "Observability\n(Prometheus, Grafana, Langfuse)" as OBS
+
+CLIENT --> SERVICE : chat, uploads, queries
+SERVICE --> KNOWLEDGE : RAG search, document upload
+SERVICE --> DB : sessions, checkpoints
+KNOWLEDGE --> DB : vector storage
+KNOWLEDGE --> NEO4J : graph storage
+SERVICE --> LLM : prompt completions
+SERVICE --> OBS : metrics & traces
+
+@enduml
