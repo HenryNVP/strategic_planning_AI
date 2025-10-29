@@ -4,24 +4,22 @@ title Strategic Planning AI – High-Level Architecture
 skinparam componentStyle rectangle
 skinparam packageStyle rectangle
 skinparam shadowing false
-skinparam defaultFontName "Segoe UI"
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
 
 skinparam rectangle {
-  BackgroundColor<<service>> #1F2430
-  FontColor<<service>> #FFFFFF
-  BorderColor<<service>> #4A90E2
+  BorderColor<<service>> #000000
+  BorderThickness<<service>> 1
 }
 
 skinparam rectangle {
-  BackgroundColor<<client>> #203040
-  FontColor<<client>> #E5EEF9
-  BorderColor<<client>> #77A8FF
+  BorderColor<<client>> #000000
+  BorderThickness<<client>> 1
 }
 
 skinparam rectangle {
-  BackgroundColor<<data>> #1E2A23
-  FontColor<<data>> #E6F2EA
-  BorderColor<<data>> #65C18C
+  BorderColor<<data>> #000000
+  BorderThickness<<data>> 1
 }
 
 ' === Client / Edge Layer ===
@@ -30,13 +28,22 @@ package "Client Layer" as CLIENT {
   [External Integrations\n(REST clients, tools)] <<client>> as EXT_CLIENTS
 }
 
-' === Agent Service ===
-package "Agent API Service\nservices/agent_ai" as AGENT_SERVICE {
-  [Auth & Session API\n(/api/v1/auth/*)] <<service>> as AUTH_API
-  [Chatbot API\n(/api/v1/chatbot/*)] <<service>> as CHAT_API
-  [Document Proxy API\n(/api/v1/documents/*)] <<service>> as DOC_PROXY
-  [LangGraph Orchestrator\n(tools, memory, retries)] <<service>> as LANGGRAPH
-  [Metrics & Tracing\n(Prometheus, Langfuse)] <<service>> as OBS_AGENT
+' === Service Layer ===
+package "Service Layer\nservices/agent_ai" as SERVICE_LAYER {
+  package "Agent Service\n(Handles: Agent Orchestration + APIs + RAG Calls)" as AGENT_SERVICE {
+    [Auth & Session API\n(/api/v1/auth/*)] <<service>> as AUTH_API
+    [Chatbot API\n(/api/v1/chatbot/*)] <<service>> as CHAT_API
+    [Document Proxy API\n(/api/v1/documents/*)] <<service>> as DOC_PROXY
+    [LangGraph Agent\n(orchestrates tools, memory, LLM)] <<service>> as LANGGRAPH
+    [Metrics & Tracing\n(Prometheus, Langfuse)] <<service>> as OBS_AGENT
+  }
+  
+  package "Analysis Components\n(strategic workflows)" as ANALYSIS_COMPONENTS {
+    [Decision & Governance\n(approvals, explainability)] <<service>> as DECISION
+    [Rules & Compliance\n(policy & budget checks)] <<service>> as RULES
+    [Scenario Simulation\n(parallel evaluation)] <<service>> as SCENARIO
+    [Optimization\n(strategy generation)] <<service>> as OPTIM
+  }
 }
 
 ' === RAG Service ===
@@ -47,22 +54,18 @@ package "RAG API Service\nservices/rag_api" as RAG_SERVICE {
   [Async Workers\n(Thread pool, task fanout)] <<service>> as RAG_WORKERS
 }
 
-' === Analysis Layer ===
-package "Analysis Layer\n(parallel evaluation)" as ANALYSIS_LAYER {
-  [Decision & Governance Hub\n(approvals, explainability)] <<service>> as DECISION
-  [Rules & Compliance Engine\n(policy & budget checks)] <<service>> as RULES
-  [Scenario Simulation Service\n(EMA Workbench, HPC/Ray)] <<service>> as SCENARIO
-  [Optimization Service\n(strategy generation)] <<service>> as OPTIM
-}
-
 ' === Data / Storage ===
 database "Postgres + pgvector\n(db container)" <<data>> as PG_DB
 [LangGraph Checkpoints\n(checkpoint_* tables)] <<data>> as CHECKPOINTS
 [Session & Auth Tables\n(sqlmodel models)] <<data>> as SESSION_DB
 
+database "Neo4j\n(knowledge graph)" <<data>> as NEO4J
+[Entity Relationships\n(nodes, edges)] <<data>> as GRAPH_DATA
+[Ontology & Schema\n(domain model)] <<data>> as ONTOLOGY
+
 ' === External Providers ===
-cloud "LLM Providers\n(OpenAI GPT, Google Gemini)" as LLM_PROVIDERS
-cloud "Embeddings Provider\n(Google Gemini Embeddings)" as EMBEDDINGS
+cloud "LLM Provider\n(OpenAI)" as LLM_PROVIDERS
+cloud "Embeddings Provider\n(OpenAI)" as EMBEDDINGS
 cloud "Observability Stack\n(Prometheus + Grafana)" as OBSERVABILITY
 cloud "Langfuse" as LANGFUSE
 
@@ -90,8 +93,10 @@ DOC_PROXY --> RAG_UPLOAD : signed pass-through for files
 RAG_UPLOAD --> RAG_WORKERS : async parsing, chunking
 RAG_UPLOAD --> EMBEDDINGS : embed documents
 RAG_UPLOAD --> PG_DB : store chunks & vectors
+RAG_UPLOAD --> NEO4J : extract & store entities/relations
 
 RAG_QUERY --> PG_DB : similarity search (pgvector)
+RAG_QUERY --> NEO4J : graph traversal, entity lookup
 RAG_QUERY --> RAG_WORKERS
 
 DECISION --> RULES : run compliance checks
@@ -113,29 +118,37 @@ AGENT_SERVICE --> OBSERVABILITY
 
 SESSION_DB --> PG_DB
 CHECKPOINTS --> PG_DB
+GRAPH_DATA --> NEO4J
+ONTOLOGY --> NEO4J
 
 ' === Notes ===
-note bottom of AGENT_SERVICE
-FastAPI + uvicorn
-LangGraph agent with rag_search & duckduckgo tools
-Optional anonymous sessions (guest user)
+note bottom of SERVICE_LAYER
+**Main Service Layer**
+- Agent Service: FastAPI + uvicorn with LangGraph orchestration
+- Manages all API endpoints, authentication, sessions
+- Orchestrates RAG calls to rag_api service
+- Analysis Components: Strategic workflows (decision, rules, scenarios)
+- Optional anonymous sessions (guest user)
 end note
 
 note bottom of RAG_SERVICE
-FastAPI + uvicorn
-Handles uploads, chunking, embeddings, and vector search
-Requires shared JWT secret with Agent API
-end note
-
-note bottom of ANALYSIS_LAYER
-Framework-agnostic microservices
-Decision hub coordinates rule checks, simulations, and optimization
-Parallel workloads emit telemetry for observability tooling
+**Vector Knowledge Service**
+- FastAPI + uvicorn
+- Handles uploads, chunking, embeddings, vector search
+- Requires shared JWT secret with Agent Service
 end note
 
 note bottom of PG_DB
-ankane/pgvector image (Docker)
-Stores chat state + vector embeddings in separate schemas
+**Postgres Database**
+- ankane/pgvector image (Docker)
+- Stores chat state, sessions, vector embeddings
+end note
+
+note bottom of NEO4J
+**Neo4j Knowledge Graph**
+- Graph database for entity relationships
+- Stores domain ontology, business rules
+- Enables graph-based reasoning & traversal
 end note
 
 @enduml

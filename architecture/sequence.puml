@@ -2,7 +2,8 @@
 title Strategic Planning AI – Key Runtime Flows
 
 skinparam shadowing false
-skinparam defaultFontName "Segoe UI"
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
 
 actor User
 participant "Mock Tester UI\n(browser)" as UI
@@ -17,8 +18,8 @@ participant "Decision Hub\n(orchestration)" as DECISION
 participant "Rules Engine" as RULES
 participant "Scenario Service" as SCENARIO
 participant "Optimization Service" as OPTIM
-participant "Embeddings Service\n(Gemini)" as EMB
-participant "LLM Provider\n(GPT / Gemini)" as LLM
+participant "Embeddings Service\n(OpenAI)" as EMB
+participant "LLM Provider\n(OpenAI)" as LLM
 participant "Langfuse / Metrics" as OBS
 
 == Guest Session bootstrap ==

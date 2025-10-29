@@ -1,0 +1,104 @@
+@startuml data_ingestion_pipeline
+title Data Ingestion Pipeline – Document Processing Flow
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam rectangle {
+  BorderColor #000000
+  BorderThickness 1
+}
+
+actor Client as CLIENT
+
+rectangle "Agent Service\n(services/agent_ai)" as AGENT {
+  rectangle "Document Proxy\n(/api/v1/documents/*)" as DOC_PROXY
+}
+
+rectangle "RAG Service\n(services/rag_api)" as RAG {
+  rectangle "Upload Endpoint\n(/embed, /embed-upload)" as UPLOAD
+  rectangle "File Storage\n(temp directory)" as FILE_STORAGE
+  rectangle "Document Loader\n(encoding detection)" as LOADER
+  rectangle "Text Extraction\n(PDF, CSV, DOCX, etc.)" as EXTRACTOR
+  rectangle "Text Cleaning\n(remove null bytes, encoding)" as CLEANER
+  rectangle "Text Chunking\n(RecursiveCharacterTextSplitter)" as CHUNKER
+  rectangle "Metadata Generation\n(file_id, user_id, digest)" as METADATA
+  rectangle "Embedding Generation\n(async workers)" as EMBEDDER
+  rectangle "Entity Extraction\n(NER, relationships)" as NER
+  rectangle "Vector Storage\n(async pgvector insert)" as VECTOR_STORE
+  rectangle "Graph Storage\n(Neo4j insert)" as GRAPH_STORE
+}
+
+cloud "OpenAI Embeddings API" as OPENAI
+
+database "Postgres + pgvector" as DB {
+  rectangle "Document Chunks\n(text + metadata)" as CHUNKS
+  rectangle "Vector Embeddings\n(pgvector)" as VECTORS
+}
+
+database "Neo4j" as NEO4J {
+  rectangle "Entity Nodes\n(extracted entities)" as ENTITIES
+  rectangle "Relationships\n(edges between entities)" as RELATIONS
+}
+
+' Main flow
+CLIENT --> DOC_PROXY : 1. Upload document\n(POST /documents/upload)
+DOC_PROXY --> UPLOAD : 2. Forward to RAG\n(with JWT auth)
+UPLOAD --> FILE_STORAGE : 3. Save to temp\n(async file write)
+FILE_STORAGE --> LOADER : 4. Detect file type\n& encoding
+LOADER --> EXTRACTOR : 5. Load document\n(PDF/CSV/DOCX loaders)
+EXTRACTOR --> CLEANER : 6. Extract text\n(by file type)
+CLEANER --> CHUNKER : 7. Clean content\n(UTF-8, null bytes)
+CHUNKER --> METADATA : 8. Split into chunks\n(CHUNK_SIZE/OVERLAP)
+METADATA --> EMBEDDER : 9a. Add metadata\n(file_id, user_id, digest)
+METADATA --> NER : 9b. Extract entities\n& relationships
+EMBEDDER --> OPENAI : 10. Generate embeddings\n(batch processing)
+OPENAI --> EMBEDDER : 11. Return vectors
+EMBEDDER --> VECTOR_STORE : 12a. Prepare docs\n+ vectors
+NER --> GRAPH_STORE : 12b. Prepare entities\n+ relations
+VECTOR_STORE --> CHUNKS : 13a. Store chunks
+VECTOR_STORE --> VECTORS : 13b. Store vectors
+GRAPH_STORE --> ENTITIES : 13c. Store entities
+GRAPH_STORE --> RELATIONS : 13d. Store relationships
+VECTOR_STORE --> CLIENT : 14. Success response\n(file_id, status)
+GRAPH_STORE --> CLIENT : (entity count)
+
+note right of LOADER
+**Supported File Types:**
+- PDF (with image extraction)
+- CSV (with encoding detection)
+- DOCX, DOC
+- TXT, MD, RST
+- XML, JSON
+- XLS, XLSX
+- PPT, PPTX
+- EPUB
+end note
+
+note right of CHUNKER
+**Chunking Configuration:**
+- Configurable chunk size
+- Configurable overlap
+- RecursiveCharacterTextSplitter
+- Preserves document structure
+end note
+
+note right of EMBEDDER
+**Async Processing:**
+- Thread pool executor
+- Parallel embedding generation
+- Rate limiting support
+- Error handling & retries
+end note
+
+note right of NER
+**Knowledge Graph Extraction:**
+- Named Entity Recognition (NER)
+- Relationship extraction
+- Entity linking & deduplication
+- Graph construction
+- Ontology alignment
+end note
+
+@enduml
+

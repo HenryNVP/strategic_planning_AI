@@ -1,48 +1,103 @@
 @startuml knowledge_layer_details
-title Knowledge & Data Layer – Detailed View
+title Knowledge Layer – RAG Service Components
 
 skinparam shadowing false
-skinparam defaultFontName "Segoe UI"
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
 skinparam rectangle {
-  BackgroundColor #1E2A23
-  FontColor #E6F2EA
-  BorderColor #65C18C
+  BorderColor #000000
+  BorderThickness 1
 }
 
-rectangle "Vector Store Cluster\n(Postgres + pgvector)" as VECTOR {
-  rectangle "Document Chunks" as CHUNKS
-  rectangle "Embeddings" as EMBEDDINGS
-  rectangle "Metadata Tables" as METADATA
+rectangle "RAG Service (FastAPI)\nservices/rag_api" as RAG_SERVICE {
+  rectangle "Security Middleware\n(JWT validation)" as SECURITY
+  
+  package "Ingestion Pipeline" as INGESTION {
+    rectangle "Document Upload\n(/embed, /embed-upload)" as UPLOAD
+    rectangle "File Loader\n(PDF, CSV, DOCX, etc.)" as LOADER
+    rectangle "Text Extraction\n& Cleaning" as EXTRACTOR
+    rectangle "Text Chunking\n(RecursiveCharacterTextSplitter)" as CHUNKER
+    rectangle "Embedding Generator\n(async workers)" as EMBEDDER
+    rectangle "Entity Extractor\n(NER, relationship extraction)" as NER
+  }
+  
+  package "Query Pipeline" as QUERY_PIPE {
+    rectangle "Vector Search\n(/query, /query_multiple)" as SEARCH
+    rectangle "Similarity Ranking\n(pgvector)" as RANKING
+    rectangle "Graph Query\n(Cypher)" as GRAPH_QUERY
+    rectangle "Hybrid Retrieval\n(vector + graph)" as HYBRID
+    rectangle "Context Retrieval" as RETRIEVAL
+  }
 }
 
-rectangle "Knowledge & KPI Store\n(Time-series / relational DB)" as KPI {
-  rectangle "Academic KPIs\n(enrollment, retention)" as KPI_ACAD
-  rectangle "Financial KPIs\n(revenue, budget)" as KPI_FIN
-  rectangle "Governance KPIs\n(accreditation, compliance)" as KPI_GOV
+database "Postgres + pgvector" as DB {
+  rectangle "Document Chunks\n(text, metadata)" as CHUNKS
+  rectangle "Vector Embeddings\n(pgvector)" as EMBEDDINGS
 }
 
-rectangle "Ingestion Pipelines" as INGEST {
-  rectangle "Document Parsers\n(PDF, CSV, HTML)" as PARSERS
-  rectangle "Embedding Jobs\n(batch, streaming)" as EMB_JOBS
-  rectangle "Data Syncs\n(ETL from ERP/SIS)" as DATA_SYNC
+database "Neo4j Graph DB" as NEO4J {
+  rectangle "Entity Nodes\n(people, orgs, concepts)" as ENTITIES
+  rectangle "Relationships\n(edges, properties)" as RELATIONS
+  rectangle "Domain Ontology\n(schema, rules)" as SCHEMA
 }
 
-rectangle "Access Interfaces" as ACCESS {
-  rectangle "RAG API" as RAG
-  rectangle "Analysis Layer" as ANALYSIS
-  rectangle "Reporting & Dashboards" as REPORTING
-}
+cloud "OpenAI\nEmbeddings API" as EMB_SERVICE
 
-PARSERS --> CHUNKS
-EMB_JOBS --> EMBEDDINGS
-DATA_SYNC --> KPI
-INGEST --> METADATA : provenance, tags
+' Ingestion flow
+SECURITY --> UPLOAD : validate request
+UPLOAD --> LOADER : load file
+LOADER --> EXTRACTOR : extract text
+EXTRACTOR --> CHUNKER : clean & chunk
+CHUNKER --> EMBEDDER : generate embeddings
+CHUNKER --> NER : extract entities
+EMBEDDER --> EMB_SERVICE : API call
+EMB_SERVICE --> EMBEDDER : return vectors
+EMBEDDER --> CHUNKS : store chunks
+EMBEDDER --> EMBEDDINGS : store vectors
+NER --> ENTITIES : create nodes
+NER --> RELATIONS : create edges
+NER --> SCHEMA : update ontology
 
-RAG --> CHUNKS : similarity search
-RAG --> EMBEDDINGS
-ANALYSIS --> KPI : baseline metrics
-ANALYSIS --> METADATA : persist scenario results
-REPORTING --> KPI
-REPORTING --> METADATA
+' Query flow
+SECURITY --> SEARCH : validate request
+SEARCH --> RANKING : vector similarity
+SEARCH --> GRAPH_QUERY : graph traversal
+RANKING --> EMBEDDINGS : vector lookup
+GRAPH_QUERY --> ENTITIES : find entities
+GRAPH_QUERY --> RELATIONS : traverse paths
+RANKING --> HYBRID : vector results
+GRAPH_QUERY --> HYBRID : graph results
+HYBRID --> RETRIEVAL : merge & rank
+RETRIEVAL --> CHUNKS : fetch content
+
+note bottom of INGESTION
+**Data Ingestion Pipeline:**
+- Supports 15+ file formats
+- Encoding detection (UTF-8, UTF-16, etc.)
+- Configurable chunk size & overlap
+- Parallel embedding generation
+- Entity & relationship extraction (NER)
+- Metadata tracking (file_id, user_id, digest)
+end note
+
+note bottom of QUERY_PIPE
+**Hybrid Query Pipeline:**
+- Vector similarity search (semantic)
+- Graph traversal (structural relationships)
+- Hybrid retrieval (vector + graph)
+- Configurable top-k results
+- Multi-file query support
+- User-based access control
+end note
+
+note right of NEO4J
+**Knowledge Graph Features:**
+- Entity recognition & linking
+- Relationship extraction
+- Graph-based reasoning
+- Cypher query language
+- Domain ontology modeling
+- Graph analytics & traversal
+end note
 
 @enduml

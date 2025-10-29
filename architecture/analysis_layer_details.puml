@@ -1,12 +1,12 @@
 @startuml analysis_layer_details
-title Analysis Layer – Workflow Components
+title Analysis Components – Service Layer Integration
 
 skinparam shadowing false
-skinparam defaultFontName "Segoe UI"
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
 skinparam rectangle {
-  BackgroundColor #2C2F3A
-  FontColor #F2F4FF
-  BorderColor #9AA7FF
+  BorderColor #000000
+  BorderThickness 1
 }
 
 rectangle "Decision & Governance Hub\n(orchestration + approvals)" as DECISION {

@@ -1,0 +1,121 @@
+@startuml neo4j_knowledge_graph
+title Neo4j Knowledge Graph – Structure & Capabilities
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam rectangle {
+  BorderColor #000000
+  BorderThickness 1
+}
+
+package "Neo4j Knowledge Graph" as NEO4J_SYSTEM {
+  
+  package "Graph Schema" as SCHEMA {
+    rectangle "Entity Types" as ENTITIES {
+      rectangle "Person\n(name, role, email)" as PERSON
+      rectangle "Organization\n(name, type, location)" as ORG
+      rectangle "Concept\n(term, definition, domain)" as CONCEPT
+      rectangle "Document\n(file_id, title, date)" as DOC
+      rectangle "Strategy\n(name, objective, status)" as STRATEGY
+      rectangle "Metric/KPI\n(name, value, unit)" as METRIC
+    }
+    
+    rectangle "Relationship Types" as RELATIONS {
+      rectangle "WORKS_FOR" as R1
+      rectangle "MENTIONS" as R2
+      rectangle "RELATES_TO" as R3
+      rectangle "PART_OF" as R4
+      rectangle "IMPLEMENTS" as R5
+      rectangle "MEASURES" as R6
+    }
+  }
+  
+  package "Graph Operations" as OPS {
+    rectangle "Entity Extraction\n(NER from documents)" as NER
+    rectangle "Relationship Extraction\n(semantic patterns)" as REL_EXTRACT
+    rectangle "Entity Resolution\n(deduplication & linking)" as RESOLVE
+    rectangle "Graph Traversal\n(Cypher queries)" as TRAVERSE
+    rectangle "Path Finding\n(shortest path, neighbors)" as PATH
+    rectangle "Community Detection\n(clustering, grouping)" as COMMUNITY
+  }
+  
+  package "Query Capabilities" as QUERIES {
+    rectangle "Entity Lookup\n(find by name/type)" as LOOKUP
+    rectangle "Multi-hop Queries\n(traverse relationships)" as MULTIHOP
+    rectangle "Pattern Matching\n(graph patterns)" as PATTERN
+    rectangle "Aggregation\n(count, group by)" as AGGREGATE
+  }
+}
+
+package "Integration Points" as INTEGRATION {
+  rectangle "RAG Service\n(rag_api)" as RAG
+  rectangle "LangGraph Agent\n(agent_ai)" as AGENT
+  rectangle "Analysis Components\n(strategic workflows)" as ANALYSIS
+}
+
+database "Vector Store\n(pgvector)" as VECTOR
+
+' Entity relationships in the graph
+PERSON --> R1 : works_for
+R1 --> ORG
+DOC --> R2 : mentions
+R2 --> PERSON
+DOC --> R2 : mentions
+R2 --> CONCEPT
+CONCEPT --> R3 : relates_to
+R3 --> CONCEPT
+STRATEGY --> R4 : part_of
+R4 --> ORG
+STRATEGY --> R5 : implements
+R5 --> CONCEPT
+METRIC --> R6 : measures
+R6 --> STRATEGY
+
+' Graph operations flow
+NER --> ENTITIES : create nodes
+REL_EXTRACT --> RELATIONS : create edges
+RESOLVE --> ENTITIES : merge duplicates
+TRAVERSE --> QUERIES : execute
+PATH --> MULTIHOP : support
+COMMUNITY --> AGGREGATE : analyze
+
+' Integration with other systems
+RAG --> NER : extract from docs
+RAG --> LOOKUP : entity search
+RAG --> MULTIHOP : graph-augmented RAG
+AGENT --> PATTERN : semantic queries
+AGENT --> TRAVERSE : reasoning chains
+ANALYSIS --> AGGREGATE : strategic insights
+VECTOR -.-> RAG : vector results
+RAG --> VECTOR : hybrid retrieval
+
+note bottom of SCHEMA
+**Graph Schema Examples:**
+- Person → WORKS_FOR → Organization
+- Document → MENTIONS → Person, Concept
+- Strategy → IMPLEMENTS → Concept
+- Metric → MEASURES → Strategy
+- Concept → RELATES_TO → Concept
+end note
+
+note bottom of QUERIES
+**Advanced Query Examples:**
+- "Find all people working on Strategy X"
+- "What concepts relate to Strategic Planning?"
+- "Show me documents mentioning Person Y"
+- "Trace KPI lineage to strategic objectives"
+- "Find similar strategies via graph similarity"
+end note
+
+note right of INTEGRATION
+**Hybrid RAG Approach:**
+1. Vector search: semantic similarity
+2. Graph search: structural relationships
+3. Combine results: relevance + context
+4. Enhanced retrieval with entity context
+5. Multi-hop reasoning over knowledge
+end note
+
+@enduml
+

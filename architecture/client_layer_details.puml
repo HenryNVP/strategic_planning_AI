@@ -1,29 +1,32 @@
 @startuml client_layer_details
-title Client / Presentation Layer – Detailed View
+title Client Layer – User Interfaces
 
 skinparam shadowing false
-skinparam defaultFontName "Segoe UI"
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
 skinparam rectangle {
-  BackgroundColor #203040
-  FontColor #E5EEF9
-  BorderColor #77A8FF
+  BorderColor #000000
+  BorderThickness 1
 }
 
-rectangle "Web Dashboard\n(Next.js / FastAPI UI)" as DASHBOARD {
-  rectangle "Session Manager\n(JWT storage, refresh)" as SESSION
-  rectangle "Chat Interface\n(streaming UI, message timeline)" as CHAT_UI
-  rectangle "Knowledge Console\n(doc upload, status cards)" as KB_UI
-  rectangle "Approval Workspace\n(strategy comparison, sign-off)" as APPROVALS
+rectangle "Web Dashboard\n(FastAPI /web/ui)" as DASHBOARD {
+  rectangle "Session Manager\n(JWT storage)" as SESSION
+  rectangle "Chat Interface\n(streaming, message history)" as CHAT_UI
+  rectangle "Document Upload\n(file upload, preview)" as DOC_UI
 }
 
-rectangle "External Integrations\n(Admin portals, SIS, tools)" as EXTERNAL
+rectangle "External Integrations\n(REST clients, tools)" as EXTERNAL
 
-rectangle "API Gateway\n(HTTPS termination, rate limits)\n/agent_api" as GATEWAY
+rectangle "Agent Service\n(FastAPI)\nservices/agent_ai" as AGENT_SERVICE {
+  rectangle "API Endpoints\n(/api/v1/auth, /api/v1/chatbot, /api/v1/documents)" as ENDPOINTS
+  rectangle "Middleware\n(auth, rate limiting, CORS)" as MIDDLEWARE
+}
 
-DASHBOARD --> GATEWAY : REST / WebSocket calls
-EXTERNAL --> GATEWAY : API requests
+DASHBOARD --> ENDPOINTS : HTTP requests
+EXTERNAL --> ENDPOINTS : API calls
 
-GATEWAY --> DASHBOARD : responses, notifications
-GATEWAY --> EXTERNAL : callbacks, webhooks
+ENDPOINTS --> MIDDLEWARE : validate & route
+MIDDLEWARE --> CHAT_UI : responses
+MIDDLEWARE --> EXTERNAL : responses
 
 @enduml

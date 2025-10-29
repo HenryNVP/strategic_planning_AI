@@ -2,40 +2,43 @@
 title Strategic Planning AI – Simplified View
 
 skinparam shadowing false
-skinparam defaultFontName "Segoe UI"
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
 skinparam packageStyle rectangle
+skinparam rectangle {
+  BorderColor #000000
+  BorderThickness 1
+}
 
 rectangle "Client Layer\n(UI + Integrations)" as CLIENT {
-  rectangle "Web Dashboard\n/ Mock Tester UI" as UI
+  rectangle "Web Dashboard\nMock Tester UI" as UI
   rectangle "External Consumers" as EXT
 }
 
-rectangle "Service Layer\n(Agent API)" as SERVICE {
-  rectangle "LangGraph Agent\n(session, tools)" as AGENT
-  rectangle "API Gateway\n(auth, rate limiting)" as GATEWAY
+rectangle "Service Layer\nservices/agent_ai\nHandles: Agent Orchestration + APIs + RAG Calls + Analysis" as SERVICE {
+  rectangle "LangGraph Agent\n(orchestration, tools, memory)" as AGENT
+  rectangle "API Endpoints\n(auth, chat, documents)" as APIS
+  rectangle "RAG Integration\n(calls to RAG service)" as RAG_INT
+  rectangle "Analysis Components\n(decision, rules, scenarios)" as ANALYSIS_COMP
 }
 
-rectangle "Analysis Layer\n(parallel workflows)" as ANALYSIS {
-  rectangle "Decision & Governance" as DECISION
-  rectangle "Rules Engine" as RULES
-  rectangle "Scenario Simulation" as SCENARIO
-  rectangle "Optimization" as OPTIM
-}
-
-rectangle "Knowledge Layer\n(context + metrics)" as KNOWLEDGE {
+rectangle "Knowledge Layer\nRAG Service (rag_api)\n(Vector Store + Knowledge Graph)" as KNOWLEDGE {
   rectangle "Vector Store\n(pgvector)" as VSTORE
-  rectangle "Knowledge & KPI Store" as KPI
+  rectangle "Knowledge Graph\n(Neo4j)" as KGRAPH
+  rectangle "Embeddings & Search\n(document chunks)" as SEARCH
 }
 
-rectangle "LLM Providers\n(OpenAI / Gemini)" as LLM
-rectangle "Observability Stack\n(Prometheus, Grafana, Langfuse)" as OBS
+database "Postgres + pgvector\n(sessions, vectors, state)" as DB
+database "Neo4j\n(entities, relationships)" as NEO4J
+cloud "LLM Provider\n(OpenAI)" as LLM
+cloud "Observability\n(Prometheus, Grafana, Langfuse)" as OBS
 
-CLIENT --> SERVICE : chat, uploads, approvals
-SERVICE --> ANALYSIS : orchestrate analyses
-SERVICE --> KNOWLEDGE : retrieve context
-ANALYSIS --> KNOWLEDGE : persist outcomes, fetch baseline data
+CLIENT --> SERVICE : chat, uploads, queries
+SERVICE --> KNOWLEDGE : RAG search, document upload
+SERVICE --> DB : sessions, checkpoints
+KNOWLEDGE --> DB : vector storage
+KNOWLEDGE --> NEO4J : graph storage
 SERVICE --> LLM : prompt completions
-SERVICE --> OBS : emit metrics
-ANALYSIS --> OBS : traces & telemetry
+SERVICE --> OBS : metrics & traces
 
 @enduml
