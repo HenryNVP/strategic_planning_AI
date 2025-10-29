@@ -1,4 +1,4 @@
-@startuml A30_layer_knowledge_data
+@startuml A3_layer_knowledge_data
 title Knowledge/Data Layer – Storage & Retrieval
 
 skinparam shadowing false
@@ -26,9 +26,9 @@ package "Knowledge/Data Layer - Storage" as KNOWLEDGE_LAYER {
 }
 
 ' Services that use this layer
-cloud "Agent Service\n(Layer 20 - Port 8000)" as AGENT_SERVICE
-cloud "RAG Service\n(Layer 20 - Port 8080)" as RAG_SERVICE
-cloud "Analysis Service\n(Layer 20 - Port 8090)" as ANALYSIS_SERVICE
+cloud "Agent Service\n(Layer 2 - Port 8000)" as AGENT_SERVICE
+cloud "RAG Service\n(Layer 2 - Port 8080)" as RAG_SERVICE
+cloud "Analysis Service\n(Layer 2 - Port 8090)" as ANALYSIS_SERVICE
 cloud "OpenAI\nEmbeddings API" as OPENAI
 
 ' Agent Service uses Application Data
@@ -76,3 +76,4 @@ Separate Neo4j instance
 end note
 
 @enduml
+

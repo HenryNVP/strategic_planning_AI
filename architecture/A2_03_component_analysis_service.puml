@@ -1,4 +1,4 @@
-@startuml A20_03_component_analysis_service
+@startuml A2_03_component_analysis_service
 title Analysis Service – Detailed Components
 
 skinparam shadowing false
@@ -77,3 +77,4 @@ FastAPI + Celery + Ray + Redis + Postgres
 end note
 
 @enduml
+

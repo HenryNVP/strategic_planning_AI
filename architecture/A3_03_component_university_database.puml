@@ -1,4 +1,4 @@
-@startuml A30_03_component_university_database
+@startuml A3_03_component_university_database
 
 title University Database Schema - Domain Data for Analysis
 
@@ -35,7 +35,7 @@ package "University Domain Database (Postgres)" as UNIVERSITY_DB {
 }
 
 ' Analysis Service queries
-cloud "Analysis Service\n(Layer 20)" as ANALYSIS_SERVICE
+cloud "Analysis Service\n(Layer 2)" as ANALYSIS_SERVICE
 
 ANALYSIS_SERVICE --> ACADEMIC : course demand, program trends
 ANALYSIS_SERVICE --> PEOPLE : faculty workload, staffing
@@ -72,4 +72,5 @@ note bottom of UNIVERSITY_DB
 end note
 
 @enduml
+
 

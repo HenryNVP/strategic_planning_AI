@@ -1,4 +1,4 @@
-@startuml A10_layer_client
+@startuml A1_layer_client
 title Client Layer – User Interfaces
 
 skinparam shadowing false
@@ -30,3 +30,4 @@ MIDDLEWARE --> CHAT_UI : responses
 MIDDLEWARE --> EXTERNAL : responses
 
 @enduml
+

@@ -5,79 +5,83 @@ This directory contains the architecture documentation for the Strategic Plannin
 ## 📁 Diagram Organization
 
 Files use a hierarchical numbering system:
-- **xx** = Layer number (01, 10, 20, 30, etc.)
-- **xx_yy** = Component within that layer
+- **x** = Layer number (0, 1, 2, 3, etc.)
+- **x_yy** = Component within that layer
 
-### 🌐 High-Level Overview (01-02)
+### 🌐 High-Level Overview (Layer 0)
 Start here to understand the overall system architecture.
 
 | File | Description |
 |------|-------------|
-| `01_overview_simplified` | **Simplified system overview** - Best starting point, shows major layers |
-| `02_overview_detailed` | **Detailed architecture** - Complete system view with all components |
+| `A0_01_overview_simplified` | **Simplified system overview** - Best starting point, shows major layers |
+| `A0_02_overview_detailed` | **Detailed architecture** - Complete system view with all components |
 
 ---
 
-### 🔷 Layer 10: Client Layer
+### 🔷 Layer 1: Client Layer
 User-facing components and external integrations.
 
 | File | Description |
 |------|-------------|
-| `10_layer_client` | **Client Layer** - User interfaces, web dashboard, external integrations |
+| `A1_layer_client` | **Client Layer** - User interfaces, web dashboard, external integrations |
 
 ---
 
-### 🔷 Layer 20: Service Layer (Microservices)
+### 🔷 Layer 2: Service Layer (Microservices)
 Core business logic microservices - one overview + details for each service.
 
 | File | Description |
 |------|-------------|
-| `20_layer_service_microservices` | **Microservices Overview** - Compact view of all 3 services |
-| `20_01_component_agent_service` | **Agent Service Detail** - LangGraph orchestration, APIs, tools |
-| `20_02_component_rag_service` | **RAG Service Detail** - Document processing, vector + graph storage |
-| `20_03_component_analysis_service` | **Analysis Service Detail** - Strategic workflows, rules, scenarios |
+| `A2_layer_service_microservices` | **Microservices Overview** - Compact view of all 3 services |
+| `A2_01_component_agent_service` | **Agent Service Detail** - LangGraph orchestration, APIs, tools |
+| `A2_02_component_rag_service` | **RAG Service Detail** - Document processing, vector + graph storage |
+| `A2_03_component_analysis_service` | **Analysis Service Detail** - Strategic workflows, rules, scenarios |
 
 ---
 
-### 🔷 Layer 30: Knowledge/Data Layer
+### 🔷 Layer 3: Knowledge/Data Layer
 Data storage and knowledge management.
 
 | File | Description |
 |------|-------------|
-| `30_layer_knowledge_data` | **Knowledge Layer Overview** - Vector store + knowledge graph architecture |
-| `30_01_component_ingestion_pipeline` | **Data Ingestion Pipeline** - Step-by-step document processing (14 steps) |
-| `30_02_component_neo4j_graph` | **Neo4j Knowledge Graph** - Graph schema, operations, queries |
+| `A3_layer_knowledge_data` | **Knowledge Layer Overview** - Vector store + knowledge graph architecture |
+| `A3_01_component_ingestion_pipeline` | **Data Ingestion Pipeline** - Step-by-step document processing (14 steps) |
+| `A3_02_component_neo4j_graph` | **Neo4j Knowledge Graph** - Graph schema, operations, queries |
+| `A3_03_component_university_database` | **University Database** - Domain data schema for analysis |
 
 ---
 
-### 🔄 Other Diagrams (40+)
+### 🔄 Other Diagrams (Layer 4+)
 
 | File | Description |
 |------|-------------|
-| `40_sequence_runtime_flows` | **Runtime Sequences** - Key runtime flows: session, ingestion, chat |
+| `A4_sequence_runtime_flows` | **Runtime Sequences** - Key runtime flows: session, ingestion, chat |
 
 ---
 
 ## 🎯 Quick Navigation Guide
 
 ### 📍 **"I want to understand the overall system"**
-→ Start with: `01_overview_simplified`
+→ Start with: `A0_01_overview_simplified`
 
 ### 📍 **"I need to see all components and connections"**
-→ Look at: `02_overview_detailed`
+→ Look at: `A0_02_overview_detailed`
 
 ### 📍 **"I'm implementing the microservices"**
-→ Start: `20_layer_service_microservices` (overview)
-→ Then: `20_01` (Agent), `20_02` (RAG), `20_03` (Analysis)
+→ Start: `A2_layer_service_microservices` (overview)
+→ Then: `A2_01` (Agent), `A2_02` (RAG), `A2_03` (Analysis)
 
 ### 📍 **"I'm working on document processing"**
-→ Study: `30_01_component_ingestion_pipeline` and `30_layer_knowledge_data`
+→ Study: `A3_01_component_ingestion_pipeline` and `A3_layer_knowledge_data`
 
 ### 📍 **"I need to understand the knowledge graph"**
-→ See: `30_02_component_neo4j_graph`
+→ See: `A3_02_component_neo4j_graph`
+
+### 📍 **"I need to understand university data structure"**
+→ See: `A3_03_component_university_database`
 
 ### 📍 **"I want to trace a user request flow"**
-→ Follow: `40_sequence_runtime_flows`
+→ Follow: `A4_sequence_runtime_flows`
 
 ---
 
@@ -85,17 +89,18 @@ Data storage and knowledge management.
 
 ```
 ┌─────────────────────────────────────────┐
-│   Layer 10: Client Layer                │  Web UI, External Consumers
+│   Layer 1: Client Layer                 │  Web UI, External Consumers
 ├─────────────────────────────────────────┤
-│   Layer 20: Service Layer               │  Microservices:
-│   ├─ 20_01: Agent Service (8000)        │  - Main orchestration
-│   ├─ 20_02: RAG Service (8080)          │  - Document processing  
-│   └─ 20_03: Analysis Service (8090)     │  - Strategic workflows
+│   Layer 2: Service Layer                │  Microservices:
+│   ├─ A2_01: Agent Service (8000)        │  - Main orchestration
+│   ├─ A2_02: RAG Service (8080)          │  - Document processing  
+│   └─ A2_03: Analysis Service (8090)     │  - Strategic workflows
 ├─────────────────────────────────────────┤
-│   Layer 30: Knowledge/Data Layer        │  Storage:
-│   ├─ 30_01: Ingestion Pipeline          │  - Document processing
-│   └─ 30_02: Neo4j Knowledge Graph       │  - Entity relationships
-│                                         │  - Vector Store (pgvector)
+│   Layer 3: Knowledge/Data Layer         │  Storage:
+│   ├─ A3_01: Ingestion Pipeline          │  - Document processing
+│   ├─ A3_02: Neo4j Knowledge Graph       │  - Entity relationships
+│   ├─ A3_03: University Database         │  - Domain data
+│   └─ Vector Store (pgvector)            │  - Embeddings
 └─────────────────────────────────────────┘
 ```
 
@@ -110,10 +115,10 @@ To regenerate PNG images from PlantUML source files:
 java -jar plantuml.jar -tpng *.puml
 
 # Generate specific diagram
-java -jar plantuml.jar -tpng 01_overview_simplified.puml
+java -jar plantuml.jar -tpng A0_01_overview_simplified.puml
 
 # Generate high-level diagrams only
-java -jar plantuml.jar -tpng 01_overview_*.puml 02_overview_*.puml
+java -jar plantuml.jar -tpng A0_*.puml
 ```
 
 ---
@@ -122,26 +127,29 @@ java -jar plantuml.jar -tpng 01_overview_*.puml 02_overview_*.puml
 
 ```
 Hierarchical numbering:
-  xx              = Layer number (e.g., 10, 20, 30)
-  xx_yy           = Component within that layer
+  Ax              = Layer number (e.g., A1, A2, A3)
+  Ax_yy           = Component within that layer
   
 Examples:
-  01              = Overview level
-  10              = Client layer
-  20              = Service layer
-  20_01           = Component within service layer (microservices detail)
-  20_02           = Another component within service layer (analysis)
-  30              = Knowledge/data layer
-  30_01           = Component within knowledge layer (ingestion)
-  30_02           = Another component (Neo4j)
-  40+             = Other diagrams (sequences, etc.)
+  A0_01           = Overview level (simplified)
+  A0_02           = Overview level (detailed)
+  A1              = Client layer
+  A2              = Service layer
+  A2_01           = Component within service layer (Agent service)
+  A2_02           = Component within service layer (RAG service)
+  A2_03           = Component within service layer (Analysis service)
+  A3              = Knowledge/data layer
+  A3_01           = Component within knowledge layer (Ingestion)
+  A3_02           = Component within knowledge layer (Neo4j)
+  A3_03           = Component within knowledge layer (University DB)
+  A4+             = Other diagrams (sequences, etc.)
 ```
 
 ### Categories in Names:
-- **overview** - High-level system views (01-02)
-- **layer** - Architectural layer (10, 20, 30)
-- **component** - Specific component within a layer (xx_yy)
-- **sequence** - Runtime sequence diagrams (40+)
+- **overview** - High-level system views (A0_01, A0_02)
+- **layer** - Architectural layer (A1, A2, A3)
+- **component** - Specific component within a layer (Ax_yy)
+- **sequence** - Runtime sequence diagrams (A4+)
 
 ---
 

@@ -1,4 +1,4 @@
-@startuml A40_sequence_runtime_flows
+@startuml A4_sequence_runtime_flows
 title Strategic Planning AI – Key Runtime Flows
 
 skinparam shadowing false
@@ -102,3 +102,4 @@ RAG_API -> OBS : service metrics / logs
 ANALYSIS -> OBS : workflow telemetry
 
 @enduml
+

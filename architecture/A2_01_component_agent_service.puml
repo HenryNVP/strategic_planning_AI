@@ -1,4 +1,4 @@
-@startuml A20_01_component_agent_service
+@startuml A2_01_component_agent_service
 title Agent Service – Detailed Components
 
 skinparam shadowing false
@@ -84,4 +84,5 @@ note bottom of AGENT_SERVICE
 end note
 
 @enduml
+
 

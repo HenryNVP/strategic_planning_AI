@@ -1,4 +1,4 @@
-@startuml A02_overview_detailed
+@startuml A0_02_overview_detailed
 title Strategic Planning AI – High-Level Architecture
 
 skinparam componentStyle rectangle
@@ -155,3 +155,4 @@ note bottom of NEO4J
 end note
 
 @enduml
+

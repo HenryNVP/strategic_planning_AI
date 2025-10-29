@@ -1,4 +1,4 @@
-@startuml A01_overview_simplified
+@startuml A0_01_overview_simplified
 title Strategic Planning AI – Simplified View
 
 skinparam shadowing false
@@ -40,3 +40,4 @@ SERVICE --> LLM : prompt completions
 SERVICE --> OBS : metrics & traces
 
 @enduml
+

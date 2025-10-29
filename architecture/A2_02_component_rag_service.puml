@@ -1,4 +1,4 @@
-@startuml A20_02_component_rag_service
+@startuml A2_02_component_rag_service
 title RAG Service – Detailed Components
 
 skinparam shadowing false
@@ -90,4 +90,5 @@ note bottom of RAG_SERVICE
 end note
 
 @enduml
+
 
