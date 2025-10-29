@@ -1,5 +1,5 @@
 @startuml A4_03_flow_chat_simple
-title Chat with RAG (Simplified)
+title Chat with RAG
 
 skinparam shadowing false
 skinparam defaultFontName Arial

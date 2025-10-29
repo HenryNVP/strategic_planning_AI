@@ -1,5 +1,5 @@
 @startuml A4_02_flow_session_auth_simple
-title Session & Authentication (Simplified)
+title Session & Authentication
 
 skinparam shadowing false
 skinparam defaultFontName Arial

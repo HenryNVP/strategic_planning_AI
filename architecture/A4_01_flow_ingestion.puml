@@ -1,5 +1,5 @@
 @startuml A4_01_flow_ingestion_simple
-title Document Ingestion (Simplified)
+title Document Ingestion
 
 skinparam shadowing false
 skinparam defaultFontName Arial
