@@ -1,4 +1,4 @@
-@startuml A4_01_flow_ingestion_simple
+@startuml A4_01_flow_ingestion
 title Document Ingestion
 
 skinparam shadowing false

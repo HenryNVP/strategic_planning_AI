@@ -1,4 +1,4 @@
-@startuml A4_03_flow_chat_simple
+@startuml A4_03_flow_chat
 title Chat with RAG
 
 skinparam shadowing false

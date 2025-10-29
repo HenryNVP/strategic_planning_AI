@@ -1,4 +1,4 @@
-@startuml A4_04_flow_analysis_simple
+@startuml A4_04_flow_analysis
 title Analysis Workflow
 
 skinparam shadowing false

@@ -1,4 +1,4 @@
-@startuml A4_02_flow_session_auth_simple
+@startuml A4_02_flow_session_auth
 title Session & Authentication
 
 skinparam shadowing false
