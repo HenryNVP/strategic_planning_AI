@@ -1,4 +1,4 @@
-@startuml agent_service_detail
+@startuml A20_01_component_agent_service
 title Agent Service – Detailed Components
 
 skinparam shadowing false

@@ -1,4 +1,4 @@
-@startuml client_layer_details
+@startuml A10_layer_client
 title Client Layer – User Interfaces
 
 skinparam shadowing false

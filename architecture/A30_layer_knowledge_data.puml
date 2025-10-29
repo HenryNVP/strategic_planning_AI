@@ -1,4 +1,4 @@
-@startuml knowledge_layer_details
+@startuml A30_layer_knowledge_data
 title Knowledge Layer – RAG Service Components
 
 skinparam shadowing false

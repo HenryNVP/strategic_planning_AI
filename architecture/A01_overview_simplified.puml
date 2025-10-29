@@ -1,4 +1,4 @@
-@startuml architecture_simplified
+@startuml A01_overview_simplified
 title Strategic Planning AI – Simplified View
 
 skinparam shadowing false

@@ -1,4 +1,4 @@
-@startuml data_ingestion_pipeline
+@startuml A30_01_component_ingestion_pipeline
 title Data Ingestion Pipeline – Document Processing Flow
 
 skinparam shadowing false

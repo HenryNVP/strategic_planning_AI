@@ -1,4 +1,4 @@
-@startuml strategic_ai_sequence
+@startuml A40_sequence_runtime_flows
 title Strategic Planning AI – Key Runtime Flows
 
 skinparam shadowing false

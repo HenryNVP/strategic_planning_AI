@@ -1,4 +1,4 @@
-@startuml neo4j_knowledge_graph
+@startuml A30_02_component_neo4j_graph
 title Neo4j Knowledge Graph – Structure & Capabilities
 
 skinparam shadowing false

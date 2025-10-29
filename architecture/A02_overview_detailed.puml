@@ -1,4 +1,4 @@
-@startuml architecture
+@startuml A02_overview_detailed
 title Strategic Planning AI – High-Level Architecture
 
 skinparam componentStyle rectangle

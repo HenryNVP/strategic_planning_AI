@@ -1,4 +1,4 @@
-@startuml rag_service_detail
+@startuml A20_02_component_rag_service
 title RAG Service – Detailed Components
 
 skinparam shadowing false
