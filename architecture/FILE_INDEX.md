@@ -15,14 +15,20 @@
 - `A2_02_component_rag_service.{puml,png}` - RAG service detailed components
 - `A2_03_component_analysis_service.{puml,png}` - Analysis service detailed components
 
-### Layer 3: Knowledge/Data
-- `A3_layer_knowledge_data.{puml,png}` - Knowledge layer overview
-- `A3_01_component_ingestion_pipeline.{puml,png}` - Data ingestion pipeline
-- `A3_02_component_neo4j_graph.{puml,png}` - Neo4j knowledge graph
-- `A3_03_component_university_database.{puml,png}` - University database schema
+### Layer 3: Knowledge/Data (Storage Only)
+- `A3_layer_knowledge_data.{puml,png}` - Storage overview (Postgres + Neo4j)
+- `A3_01_component_neo4j_graph.{puml,png}` - Neo4j knowledge graph
+- `A3_02_component_university_database.{puml,png}` - University database schema
 
-### Other (Layer 4+)
-- `A4_sequence_runtime_flows.{puml,png}` - Runtime sequence diagrams
+### Layer 4: Flows & Sequences
+- `A4_00_flow_overview.{puml,png}` - Overview of all runtime flows (comprehensive)
+- `A4_01_flow_ingestion_pipeline.{puml,png}` - Document ingestion (RAG Service, 14 steps)
+- `A4_02_flow_session_auth.{puml,png}` - Session & authentication (guest/user, JWT)
+- `A4_03a_flow_chat_sync.{puml,png}` - Chat sync mode (standard request/response)
+- `A4_03b_flow_chat_stream.{puml,png}` - Chat streaming mode (SSE, real-time)
+- `A4_03c_flow_chat_history.{puml,png}` - Chat history (get & clear)
+- `A4_04_flow_analysis_workflow.{puml,png}` - Analysis workflow (simplified)
+- `A4_04_flow_analysis_detailed.{puml,png}` - Analysis workflow (detailed, all phases)
 
 ---
 
@@ -43,10 +49,14 @@ Examples:
   A2_01_component_agent_service          → Component 01 within layer 2
   A2_02_component_rag_service            → Component 02 within layer 2
   A2_03_component_analysis_service       → Component 03 within layer 2
-  A3_layer_knowledge_data                → Layer 3 overview
-  A3_01_component_ingestion_pipeline     → Component 01 within layer 3
-  A3_02_component_neo4j_graph            → Component 02 within layer 3
-  A3_03_component_university_database    → Component 03 within layer 3
+  A3_layer_knowledge_data                → Layer 3 overview (storage)
+  A3_01_component_neo4j_graph            → Component 01 within layer 3
+  A3_02_component_university_database    → Component 02 within layer 3
+  A4_00_flow_overview                    → Overview (all flows)
+  A4_01_flow_ingestion_pipeline          → Document ingestion (Layer 2 → Layer 3)
+  A4_02_flow_session_auth                → Session & authentication
+  A4_03_flow_chat_rag                    → Chat with RAG context
+  A4_04_flow_analysis_workflow           → Strategic analysis workflow
 ```
 
 ## Quick Reference

@@ -1,0 +1,39 @@
+@startuml A4_03c_flow_chat_history
+title Chat History Management – Get & Clear
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+
+actor User
+participant "Web UI" as UI
+participant "Chat API" as CHAT
+participant "LangGraph" as GRAPH
+database "Postgres" as DB
+
+== Get Conversation History ==
+User -> UI : view history
+UI -> CHAT : GET /chatbot/messages?session_id=xxx
+activate CHAT
+CHAT -> GRAPH : load_state(session_id)
+activate GRAPH
+GRAPH -> DB : fetch checkpoints
+DB --> GRAPH : conversation state
+GRAPH --> CHAT : message list
+deactivate GRAPH
+CHAT --> UI : {messages}
+deactivate CHAT
+UI -> User : display messages
+
+== Clear Conversation ==
+User -> UI : clear chat
+UI -> CHAT : DELETE /chatbot/messages?session_id=xxx
+activate CHAT
+CHAT -> DB : DELETE FROM checkpoint_*\nWHERE thread_id = session_id
+DB --> CHAT : deleted
+CHAT --> UI : confirmation
+deactivate CHAT
+UI -> User : conversation cleared
+
+@enduml
+

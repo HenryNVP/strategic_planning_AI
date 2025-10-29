@@ -1,5 +1,5 @@
-@startuml A4_sequence_runtime_flows
-title Strategic Planning AI – Key Runtime Flows
+@startuml A4_00_flow_overview
+title Runtime Flows Overview – High-Level Interactions
 
 skinparam shadowing false
 skinparam defaultFontName Arial
@@ -100,6 +100,14 @@ AGENT --> UI : confirmation
 AGENT -> OBS : Prometheus metrics, Langfuse traces
 RAG_API -> OBS : service metrics / logs
 ANALYSIS -> OBS : workflow telemetry
+
+note right of UI
+**Detailed Flow Diagrams:**
+- Session & Auth: A4_02_flow_session_auth
+- Chat with RAG: A4_03_flow_chat_rag
+- Analysis Workflow: A4_04_flow_analysis_workflow
+- Document Ingestion: A4_01_flow_ingestion_pipeline
+end note
 
 @enduml
 

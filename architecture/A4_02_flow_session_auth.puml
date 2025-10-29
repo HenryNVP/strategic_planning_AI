@@ -1,0 +1,80 @@
+@startuml A4_02_flow_session_auth
+title Session & Authentication Flow – Guest & User Sessions
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam rectangle {
+  BorderColor #000000
+  BorderThickness 1
+}
+
+actor User
+participant "Web UI\n(browser)" as UI
+participant "Auth API\n(/api/v1/auth)" as AUTH
+database "Postgres" as DB
+
+== Guest Session Creation ==
+User -> UI : Open /ui test console
+UI -> AUTH : POST /auth/session\n(no Authorization header)
+activate AUTH
+AUTH -> DB : get_or_create_guest_user()
+activate DB
+DB --> AUTH : guest user record
+deactivate DB
+AUTH -> DB : create session + checkpoint thread
+activate DB
+DB --> AUTH : session_id, thread_id
+deactivate DB
+AUTH --> UI : session token (JWT)
+deactivate AUTH
+UI -> UI : store token in browser localStorage
+note right of UI
+Token stored locally:
+- Used for subsequent requests
+- Contains session_id
+- Contains user_id (guest or real)
+end note
+
+== Authenticated User Session ==
+User -> UI : Login with credentials
+UI -> AUTH : POST /auth/login\n{username, password}
+activate AUTH
+AUTH -> DB : validate credentials
+activate DB
+DB --> AUTH : user record
+deactivate DB
+AUTH -> DB : create authenticated session
+activate DB
+DB --> AUTH : session_id, thread_id
+deactivate DB
+AUTH --> UI : session token (JWT)
+deactivate AUTH
+UI -> UI : store token in browser localStorage
+
+== Session Validation ==
+User -> UI : Any protected action
+UI -> AUTH : Request with\nAuthorization: Bearer <token>
+activate AUTH
+AUTH -> AUTH : validate JWT signature
+AUTH -> DB : check session active
+activate DB
+DB --> AUTH : session valid
+deactivate DB
+AUTH --> UI : proceed with action
+deactivate AUTH
+
+== Session Cleanup ==
+User -> UI : Logout
+UI -> AUTH : POST /auth/logout\nAuthorization: Bearer <token>
+activate AUTH
+AUTH -> DB : delete session
+activate DB
+DB --> AUTH : session deleted
+deactivate DB
+AUTH --> UI : logout successful
+deactivate AUTH
+UI -> UI : clear token from localStorage
+
+@enduml
+

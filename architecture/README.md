@@ -40,22 +40,29 @@ Core business logic microservices - one overview + details for each service.
 ---
 
 ### 🔷 Layer 3: Knowledge/Data Layer
-Data storage and knowledge management.
+**Storage components only** - No processing logic, just data storage.
 
 | File | Description |
 |------|-------------|
-| `A3_layer_knowledge_data` | **Knowledge Layer Overview** - Vector store + knowledge graph architecture |
-| `A3_01_component_ingestion_pipeline` | **Data Ingestion Pipeline** - Step-by-step document processing (14 steps) |
-| `A3_02_component_neo4j_graph` | **Neo4j Knowledge Graph** - Graph schema, operations, queries |
-| `A3_03_component_university_database` | **University Database** - Domain data schema for analysis |
+| `A3_layer_knowledge_data` | **Storage Overview** - Postgres (relational + vector) + Neo4j (graph) |
+| `A3_01_component_neo4j_graph` | **Neo4j Knowledge Graph** - Graph schema, operations, queries |
+| `A3_02_component_university_database` | **University Database** - Domain data schema for analysis |
 
 ---
 
-### 🔄 Other Diagrams (Layer 4+)
+### 🔄 Layer 4: Flows & Sequences
+**Runtime flows and data pipelines** - How services interact and process data.
 
 | File | Description |
 |------|-------------|
-| `A4_sequence_runtime_flows` | **Runtime Sequences** - Key runtime flows: session, ingestion, chat |
+| `A4_00_flow_overview` | **Overview** - All runtime flows together (comprehensive) |
+| `A4_01_flow_ingestion_pipeline` | **Document Ingestion** - RAG Service processing (14 steps) |
+| `A4_02_flow_session_auth` | **Session & Auth** - Guest/user sessions, JWT validation |
+| `A4_03a_flow_chat_sync` | **Chat (Sync)** - Standard request/response |
+| `A4_03b_flow_chat_stream` | **Chat (Streaming)** - Real-time SSE token delivery |
+| `A4_03c_flow_chat_history` | **Chat History** - Get & clear conversation |
+| `A4_04_flow_analysis_workflow` | **Analysis Workflow (Simplified)** - Strategic decisions |
+| `A4_04_flow_analysis_detailed` | **Analysis Workflow (Detailed)** - Full execution flow |
 
 ---
 
@@ -72,16 +79,25 @@ Data storage and knowledge management.
 → Then: `A2_01` (Agent), `A2_02` (RAG), `A2_03` (Analysis)
 
 ### 📍 **"I'm working on document processing"**
-→ Study: `A3_01_component_ingestion_pipeline` and `A3_layer_knowledge_data`
+→ Flow: `A4_01_flow_ingestion_pipeline` (shows RAG Service processing)
+→ Storage: `A3_layer_knowledge_data` (shows where data is stored)
 
 ### 📍 **"I need to understand the knowledge graph"**
-→ See: `A3_02_component_neo4j_graph`
+→ See: `A3_01_component_neo4j_graph`
 
 ### 📍 **"I need to understand university data structure"**
-→ See: `A3_03_component_university_database`
+→ See: `A3_02_component_university_database`
 
-### 📍 **"I want to trace a user request flow"**
-→ Follow: `A4_sequence_runtime_flows`
+### 📍 **"I want to trace user request flows"**
+→ Start: `A4_00_flow_overview` (comprehensive overview)
+→ Focused flows:
+  - **Session/Auth**: `A4_02_flow_session_auth`
+  - **Chat (Sync)**: `A4_03a_flow_chat_sync`
+  - **Chat (Streaming)**: `A4_03b_flow_chat_stream`
+  - **Chat History**: `A4_03c_flow_chat_history`
+  - **Analysis (Simple)**: `A4_04_flow_analysis_workflow`
+  - **Analysis (Detailed)**: `A4_04_flow_analysis_detailed`
+  - **Document Upload**: `A4_01_flow_ingestion_pipeline`
 
 ---
 
@@ -96,11 +112,18 @@ Data storage and knowledge management.
 │   ├─ A2_02: RAG Service (8080)          │  - Document processing  
 │   └─ A2_03: Analysis Service (8090)     │  - Strategic workflows
 ├─────────────────────────────────────────┤
-│   Layer 3: Knowledge/Data Layer         │  Storage:
-│   ├─ A3_01: Ingestion Pipeline          │  - Document processing
-│   ├─ A3_02: Neo4j Knowledge Graph       │  - Entity relationships
-│   ├─ A3_03: University Database         │  - Domain data
-│   └─ Vector Store (pgvector)            │  - Embeddings
+│   Layer 3: Knowledge/Data Layer         │  Storage Only:
+│   ├─ Postgres (relational + vector)     │  - App data, domain data
+│   │  ├─ A3_02: University Database      │  - Vector embeddings
+│   └─ Neo4j (graph)                      │  
+│      └─ A3_01: Knowledge Graph          │  - Entity relationships
+├─────────────────────────────────────────┤
+│   Layer 4: Flows & Sequences            │  How services work:
+│   ├─ A4_00: Overview (all flows)        │  - High-level view
+│   ├─ A4_01: Document ingestion          │  - Upload → Storage
+│   ├─ A4_02: Session & auth              │  - Login & JWT
+│   ├─ A4_03: Chat with RAG               │  - Conversation flow
+│   └─ A4_04: Analysis workflow           │  - Strategic decisions
 └─────────────────────────────────────────┘
 ```
 
@@ -138,11 +161,11 @@ Examples:
   A2_01           = Component within service layer (Agent service)
   A2_02           = Component within service layer (RAG service)
   A2_03           = Component within service layer (Analysis service)
-  A3              = Knowledge/data layer
-  A3_01           = Component within knowledge layer (Ingestion)
-  A3_02           = Component within knowledge layer (Neo4j)
-  A3_03           = Component within knowledge layer (University DB)
-  A4+             = Other diagrams (sequences, etc.)
+  A3              = Knowledge/data layer (storage only)
+  A3_01           = Component: Neo4j Knowledge Graph
+  A3_02           = Component: University Database
+  A4              = Flows & sequences (how services work)
+  A4_01           = Flow: RAG Service ingestion pipeline
 ```
 
 ### Categories in Names:

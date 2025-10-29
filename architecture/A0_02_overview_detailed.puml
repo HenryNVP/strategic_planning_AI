@@ -54,14 +54,19 @@ package "RAG API Service\nservices/rag_api" as RAG_SERVICE {
   [Async Workers\n(Thread pool, task fanout)] <<service>> as RAG_WORKERS
 }
 
-' === Data / Storage ===
-database "Postgres + pgvector\n(db container)" <<data>> as PG_DB
-[LangGraph Checkpoints\n(checkpoint_* tables)] <<data>> as CHECKPOINTS
-[Session & Auth Tables\n(sqlmodel models)] <<data>> as SESSION_DB
-
-database "Neo4j\n(knowledge graph)" <<data>> as NEO4J
-[Entity Relationships\n(nodes, edges)] <<data>> as GRAPH_DATA
-[Ontology & Schema\n(domain model)] <<data>> as ONTOLOGY
+' === Data / Storage (Layer 3) ===
+package "Knowledge/Data Layer - Storage" as DATA_LAYER {
+  database "Postgres\n(relational + vector)" <<data>> as PG_DB {
+    [Application Data\n(sessions, users, checkpoints)] <<data>> as APP_DATA
+    [University Domain Data\n(courses, students, faculty, budgets)] <<data>> as DOMAIN_DATA
+    [Vector Store (pgvector)\n(document chunks + embeddings)] <<data>> as VECTOR_DATA
+  }
+  
+  database "Neo4j\n(knowledge graph)" <<data>> as NEO4J {
+    [Entity Nodes\n(people, concepts, strategies)] <<data>> as ENTITIES
+    [Relationships\n(edges, properties)] <<data>> as RELATIONS
+  }
+}
 
 ' === External Providers ===
 cloud "LLM Provider\n(OpenAI)" as LLM_PROVIDERS
@@ -76,50 +81,41 @@ MOCK_UI --> DOC_PROXY : upload docs, list file_ids, preview chunks
 EXT_CLIENTS --> AUTH_API
 EXT_CLIENTS --> CHAT_API
 
-AUTH_API --> SESSION_DB : create users, guest account, sessions
-AUTH_API --> CHECKPOINTS : provision thread IDs
+AUTH_API --> APP_DATA : create users, sessions
+AUTH_API --> APP_DATA : provision thread IDs
 
 CHAT_API --> LANGGRAPH : invoke workflow per session
-CHAT_API --> SESSION_DB : rate limiting, validator (read-only)
-CHAT_API --> CHECKPOINTS : persist conversation state
+CHAT_API --> APP_DATA : rate limiting
+CHAT_API --> APP_DATA : persist conversation state
 
-LANGGRAPH --> RAG_QUERY : rag_search tool\n(JWT-authenticated call)
-LANGGRAPH --> LLM_PROVIDERS : send prompts / receive completions
-LANGGRAPH --> CHECKPOINTS : load/store state snapshots
+LANGGRAPH --> RAG_QUERY : rag_search tool (JWT)
+LANGGRAPH --> LLM_PROVIDERS : prompts & completions
+LANGGRAPH --> APP_DATA : load/store checkpoints
 LANGGRAPH --> DECISION : submit analysis workflows
 
-DOC_PROXY --> RAG_UPLOAD : signed pass-through for files
+DOC_PROXY --> RAG_UPLOAD : proxy document uploads
 
 RAG_UPLOAD --> RAG_WORKERS : async parsing, chunking
-RAG_UPLOAD --> EMBEDDINGS : embed documents
-RAG_UPLOAD --> PG_DB : store chunks & vectors
-RAG_UPLOAD --> NEO4J : extract & store entities/relations
+RAG_UPLOAD --> EMBEDDINGS : generate embeddings
+RAG_UPLOAD --> VECTOR_DATA : store chunks & vectors
+RAG_UPLOAD --> ENTITIES : extract entities (NER)
+RAG_UPLOAD --> RELATIONS : store relationships
 
-RAG_QUERY --> PG_DB : similarity search (pgvector)
-RAG_QUERY --> NEO4J : graph traversal, entity lookup
-RAG_QUERY --> RAG_WORKERS
+RAG_QUERY --> VECTOR_DATA : similarity search (pgvector)
+RAG_QUERY --> ENTITIES : entity lookup
+RAG_QUERY --> RELATIONS : graph traversal
 
-DECISION --> RULES : run compliance checks
-DECISION --> SCENARIO : launch scenario experiments
-DECISION --> OPTIM : request strategy optimization
-RULES --> DECISION : validation results
-SCENARIO --> DECISION : scenario metrics & findings
-OPTIM --> DECISION : recommended portfolios
-SCENARIO --> PG_DB : persist experiment outputs / KPIs
-OPTIM --> RAG_UPLOAD : publish strategy summaries
+DECISION --> RULES : compliance checks
+DECISION --> SCENARIO : launch scenarios
+DECISION --> OPTIM : optimization
+DECISION --> DOMAIN_DATA : query university data
+SCENARIO --> APP_DATA : persist results
+OPTIM --> RAG_QUERY : context retrieval
 
 CHAT_API --> OBS_AGENT
-CHAT_API --> LANGFUSE
-LANGGRAPH --> OBS_AGENT
 LANGGRAPH --> LANGFUSE
-
 RAG_SERVICE --> OBSERVABILITY
 AGENT_SERVICE --> OBSERVABILITY
-
-SESSION_DB --> PG_DB
-CHECKPOINTS --> PG_DB
-GRAPH_DATA --> NEO4J
-ONTOLOGY --> NEO4J
 
 ' === Notes ===
 note bottom of SERVICE_LAYER
@@ -141,17 +137,17 @@ note bottom of RAG_SERVICE
 - Requires shared JWT secret with Agent Service
 end note
 
-note bottom of PG_DB
-**Postgres Database**
-- ankane/pgvector image (Docker)
-- Stores chat state, sessions, vector embeddings
-end note
+note bottom of DATA_LAYER
+**Layer 3: Storage Components**
+**Postgres (3 data types):**
+- Application data (sessions, users, checkpoints)
+- University domain data (courses, students, faculty, budgets)
+- Vector store (pgvector: document chunks + embeddings)
 
-note bottom of NEO4J
-**Neo4j Knowledge Graph**
-- Graph database for entity relationships
-- Stores domain ontology, business rules
-- Enables graph-based reasoning & traversal
+**Neo4j:**
+- Entity nodes (people, concepts, strategies, documents)
+- Relationships (edges with properties)
+- Domain ontology & business rules
 end note
 
 @enduml

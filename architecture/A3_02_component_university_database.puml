@@ -1,4 +1,4 @@
-@startuml A3_03_component_university_database
+@startuml A3_02_component_university_database
 
 title University Database Schema - Domain Data for Analysis
 

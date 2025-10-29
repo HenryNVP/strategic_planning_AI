@@ -1,0 +1,59 @@
+@startuml A4_03b_flow_chat_stream
+title Chat Flow (Streaming) – Real-time Token Delivery
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+
+actor User
+participant "Web UI" as UI
+participant "Chat API" as CHAT
+participant "LangGraph" as GRAPH
+participant "RAG API" as RAG
+database "Postgres" as DB
+participant "OpenAI" as LLM
+
+User -> UI : type message
+UI -> CHAT : POST /chatbot/chat/stream\n{message, session_id, JWT}
+activate CHAT
+
+CHAT -> GRAPH : astream(session_id, messages)
+activate GRAPH
+
+' RAG retrieval (same as sync)
+GRAPH -> RAG : retrieve context
+activate RAG
+RAG --> GRAPH : passages
+deactivate RAG
+
+' Stream from LLM
+GRAPH -> LLM : stream_response()
+activate LLM
+
+loop Server-Sent Events (SSE)
+  LLM --> GRAPH : token chunk
+  GRAPH --> CHAT : token chunk
+  CHAT --> UI : data: {content: "word", done: false}
+  UI -> User : display word immediately
+end
+
+LLM --> GRAPH : final chunk
+deactivate LLM
+
+GRAPH -> DB : save checkpoint
+GRAPH --> CHAT : done
+deactivate GRAPH
+
+CHAT --> UI : data: {done: true}
+deactivate CHAT
+
+note right of UI
+**Streaming Benefits:**
+- Real-time feedback
+- Appears faster to user
+- Can cancel mid-response
+- Better UX for long answers
+end note
+
+@enduml
+

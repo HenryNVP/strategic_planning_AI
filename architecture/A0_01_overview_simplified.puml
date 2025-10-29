@@ -16,27 +16,38 @@ rectangle "Client Layer\n(UI + Integrations)" as CLIENT {
 }
 
 rectangle "Service Layer\n(Microservices)" as SERVICE {
-  rectangle "Agent Service\n(Port 8000)\norchestration, APIs, tools" as AGENT_SVC
-  rectangle "RAG Service\n(Port 8080)\ndocument processing, search" as RAG_SVC
-  rectangle "Analysis Service\n(Port 8090)\nstrategic workflows" as ANALYSIS_SVC
+  rectangle "Agent Service\norchestration, APIs, tools" as AGENT_SVC
+  rectangle "RAG Service\ndocument processing, search" as RAG_SVC
+  rectangle "Analysis Service\nstrategic workflows" as ANALYSIS_SVC
 }
 
 rectangle "Knowledge / Data Layer\n(Storage)" as KNOWLEDGE {
-  rectangle "Vector Store\n(Postgres + pgvector)" as VSTORE
-  rectangle "Knowledge Graph\n(Neo4j)" as KGRAPH
+  rectangle "Relational DB\n(Postgres)\napp + domain data" as RDBMS
+  rectangle "Vector Store\n(Postgres + pgvector)\ndocument embeddings" as VSTORE
+  rectangle "Knowledge Graph\n(Neo4j)\nentities + relations" as KGRAPH
 }
 
-database "Postgres + pgvector\n(sessions, vectors, state)" as DB
-database "Neo4j\n(entities, relationships)" as NEO4J
 cloud "LLM Provider\n(OpenAI)" as LLM
 cloud "Observability\n(Prometheus, Grafana, Langfuse)" as OBS
 
-CLIENT --> SERVICE : chat, uploads, queries
-SERVICE --> KNOWLEDGE : RAG search, document upload
-SERVICE --> DB : sessions, checkpoints
-KNOWLEDGE --> DB : vector storage
-KNOWLEDGE --> NEO4J : graph storage
-SERVICE --> LLM : prompt completions
+' Client to Service
+CLIENT --> AGENT_SVC : chat, auth
+CLIENT --> AGENT_SVC : document upload (proxy)
+
+' Service to Service
+AGENT_SVC --> RAG_SVC : RAG search, doc processing
+AGENT_SVC --> ANALYSIS_SVC : analysis workflows
+ANALYSIS_SVC --> RAG_SVC : context retrieval
+
+' Service to Storage
+AGENT_SVC --> RDBMS : sessions, checkpoints, users
+RAG_SVC --> VSTORE : store/search vectors
+RAG_SVC --> KGRAPH : store/query entities
+ANALYSIS_SVC --> RDBMS : query university data
+
+' External
+AGENT_SVC --> LLM : prompt completions
+RAG_SVC --> LLM : embeddings
 SERVICE --> OBS : metrics & traces
 
 @enduml

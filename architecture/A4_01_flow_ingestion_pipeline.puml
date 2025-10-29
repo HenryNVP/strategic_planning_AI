@@ -1,5 +1,5 @@
-@startuml A3_01_component_ingestion_pipeline
-title Data Ingestion Pipeline – Document Processing Flow
+@startuml A4_01_flow_ingestion_pipeline
+title Data Ingestion Flow – RAG Service (Layer 2) Processing
 
 skinparam shadowing false
 skinparam defaultFontName Arial
@@ -63,16 +63,22 @@ GRAPH_STORE --> RELATIONS : 13d. Store relationships
 VECTOR_STORE --> CLIENT : 14. Success response\n(file_id, status)
 GRAPH_STORE --> CLIENT : (entity count)
 
+note right of RAG
+**RAG Service (Layer 2)**
+This entire pipeline runs in the RAG Service
+- Processes documents
+- Generates embeddings
+- Extracts entities
+- Writes to Layer 3 storage
+end note
+
 note right of LOADER
 **Supported File Types:**
 - PDF (with image extraction)
 - CSV (with encoding detection)
-- DOCX, DOC
-- TXT, MD, RST
-- XML, JSON
-- XLS, XLSX
-- PPT, PPTX
-- EPUB
+- DOCX, DOC, TXT, MD, RST
+- XML, JSON, XLS, XLSX
+- PPT, PPTX, EPUB
 end note
 
 note right of CHUNKER
